@@ -1,0 +1,34 @@
+# docker-compose file
+#
+# project: crdm-tools
+# author: b.briotribeyre@nhs.net
+
+version: '3'
+
+services:
+
+  r-environment:
+    env_file: './env/.env'
+    environment:
+      - 'HTTP_PROXY=${PROXY}'
+      - 'HTTPS_PROXY=${PROXY}'
+      - 'CRDM_TOOL=${CRDM_TOOL}'
+      - 'CRDM_CONF=${CRDM_CONF}'
+    volumes:
+      - './env/app:/app'
+      - 'network-storage:/share'
+    build:
+      context: './env'
+      args:
+        - 'FTP_PROXY=${PROXY}'
+        - 'HTTP_PROXY=${PROXY}'
+        - 'HTTPS_PROXY=${PROXY}'
+
+volumes:
+
+  network-storage:
+    driver: 'local'
+    driver_opts:
+      type: 'cifs'
+      device: '${NETWORK_STORAGE}'
+      o: 'user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}'
