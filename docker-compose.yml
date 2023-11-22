@@ -7,28 +7,57 @@ version: '3'
 
 services:
 
-  r-environment:
-    env_file: './env/.env'
+  omop_es:
+    env_file: './omop_es/.env'
     environment:
       - 'HTTP_PROXY=${PROXY}'
       - 'HTTPS_PROXY=${PROXY}'
-      - 'CRDM_TOOL=${CRDM_TOOL}'
-      - 'CRDM_CONF=${CRDM_CONF}'
+      - 'CRDM_ID=${ID}'
+      - 'GIT_USERNAME=${GIT_USERNAME}'
+      - 'GIT_PASSWORD=${GIT_PASSWORD}'
     volumes:
-      - './env/app:/app'
-      - 'network-storage:/share'
+      - './omop_es/app:/app'
+      - 'sharefs6-criudata:/share/criudata'
+      - 'sharefs7-crdm:/share/crdm'
     build:
-      context: './env'
+      context: './omop_es'
       args:
         - 'FTP_PROXY=${PROXY}'
         - 'HTTP_PROXY=${PROXY}'
         - 'HTTPS_PROXY=${PROXY}'
 
+  omop-cascade:
+    env_file: './omop-cascade/.env'
+    environment:
+      - 'HTTP_PROXY=${PROXY}'
+      - 'HTTPS_PROXY=${PROXY}'
+      - 'CRDM_ID=${ID}'
+      - 'GIT_USERNAME=${GIT_USERNAME}'
+      - 'GIT_PASSWORD=${GIT_PASSWORD}'
+    volumes:
+      - './omop-cascade/app:/app'
+      - 'sharefs6-criudata:/share/criudata'
+      - 'sharefs7-crdm:/share/crdm'
+    build:
+      context: './omop-cascade'
+      args:
+        - 'FTP_PROXY=${PROXY}'
+        - 'HTTP_PROXY=${PROXY}'
+        - 'HTTPS_PROXY=${PROXY}'
+    network_mode: host
+
 volumes:
 
-  network-storage:
+  sharefs6-criudata:
     driver: 'local'
     driver_opts:
       type: 'cifs'
-      device: '${NETWORK_STORAGE}'
+      device: '${SHAREFS6_CRIUDATA}'
+      o: 'user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}'
+
+  sharefs7-crdm:
+    driver: 'local'
+    driver_opts:
+      type: 'cifs'
+      device: '${SHAREFS7_CRDM}'
       o: 'user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}'
