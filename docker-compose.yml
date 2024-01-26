@@ -13,10 +13,12 @@ services:
       - 'HTTP_PROXY=${PROXY}'
       - 'HTTPS_PROXY=${PROXY}'
       - 'CRDM_ID=${ID}'
+      - 'CRDM_BATCH=${BATCH}'
       - 'GIT_USERNAME=${GIT_USERNAME}'
       - 'GIT_PASSWORD=${GIT_PASSWORD}'
     volumes:
       - './omop_es/app:/app'
+      - './omop_es/local:/share/local'
       - 'sharefs6-criudata:/share/criudata'
       - 'sharefs7-crdm:/share/crdm'
     build:
