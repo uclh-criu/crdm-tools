@@ -118,7 +118,20 @@ RUN R -e "install.packages('/tmp/assertive_0.3-6.tar.gz', repos = NULL, type = '
 
 RUN R -e "install.packages('V8', dependencies = TRUE)"
 RUN R -e "install.packages('jsonvalidate', dependencies = TRUE)"
-
 RUN R -e "install.packages('R.utils', dependencies = TRUE)"
+
+RUN R -e "install.packages('zip', dependencies = TRUE)"
+RUN R -e "install.packages('processx', dependencies = TRUE)"
+RUN R -e "install.packages('parquetize', dependencies = TRUE)"
+RUN R -e "install.packages('gt', dependencies = TRUE)"
+RUN R -e "install.packages('readr', dependencies = TRUE)"
+RUN R -e "install.packages('readxl', dependencies = TRUE)"
+RUN R -e "install.packages('remotes', dependencies = TRUE)"
+RUN R -e "install.packages('testthat', dependencies = TRUE)"
+RUN R -e "install.packages('assertthat', dependencies = TRUE)"
+
+RUN ln -s /usr/bin/tar /bin/tar
+RUN R -e "remotes::install_github('andysouth/omopcept')"
+RUN rm /bin/tar
 
 ENTRYPOINT ["bash", "/app/entrypoint.sh"]

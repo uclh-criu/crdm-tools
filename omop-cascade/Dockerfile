@@ -87,4 +87,9 @@ RUN R -e "install.packages('janitor', dependencies = TRUE)"
 
 RUN R -e "install.packages('config', dependencies = TRUE)"
 
+# 21/02/2024
+
+RUN R -e "install.packages('purrr', dependencies = TRUE)"
+RUN R -e "install.packages('RPostgres', dependencies = TRUE)"
+
 ENTRYPOINT ["bash", "/app/entrypoint.sh"]
