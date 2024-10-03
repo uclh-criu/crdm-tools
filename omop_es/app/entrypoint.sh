@@ -2,9 +2,9 @@
 # Rscript /app/test_libraries.R
 URL="https://${GIT_USERNAME}:${GIT_PASSWORD}@${GIT_URL}"
 DIR="/omop_es"
-OUT="/share/criudata/crdm-tools/omop_es/$CRDM_ID/$(date +"%Y%m%d%H%M%S")"
-[ -d "$DIR" ] && git -C "$DIR" pull "$URL"
-[ ! -d "$DIR" ] && git clone "$URL" "$DIR" && cd /omop_es && Rscript env_setup/download_omop_metadata.R
+OUT="/sharefs6/criudata/live/crdm-tools/omop_es/$CRDM_ID/$(date +"%Y%m%d%H%M%S")"
+[ -d "$DIR" ] && git -C "$DIR" pull "$URL" "$GIT_BRANCH"
+[ ! -d "$DIR" ] && git clone -b "$GIT_BRANCH" "$URL" "$DIR" && cd /omop_es && Rscript omop_metadata/download_omop_metadata.R
 cd /omop_es
 if $CRDM_BATCH; then
     Rscript main_batched.R --id $CRDM_ID
