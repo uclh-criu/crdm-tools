@@ -14,6 +14,9 @@ services:
       - 'HTTPS_PROXY=${PROXY}'
       - 'CRDM_ID=${ID}'
       - 'CRDM_BATCH=${BATCH}'
+      - 'CRDM_ZIP=${ZIP}'
+      - 'CRDM_START=${START}'
+      - 'CRDM_DIR=${DIR}'
       - 'GIT_USERNAME=${GIT_USERNAME}'
       - 'GIT_PASSWORD=${GIT_PASSWORD}'
     volumes:
@@ -38,6 +41,7 @@ services:
       - 'GIT_PASSWORD=${GIT_PASSWORD}'
     volumes:
       - './omop-cascade/app:/app'
+      - './omop-cascade/local:/share/local'
       - 'sharefs6-criudata:/sharefs6/criudata/Live'
       - 'sharefs7-crdm:/sharefs7/crdm/Shared'
     build:
