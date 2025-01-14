@@ -32,8 +32,8 @@ fi
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with CRDM are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
-if $CRDM_BATCH; then
-    Rscript $MAIN_BATCHED --id $CRDM_ID --zip $CRDM_ZIP --batch $CRDM_START --dir $CRDM_DIR
+if $OMOP_ES_BATCHED; then
+    Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID --start_batch $OMOP_ES_START_BATCH --extract_dt $OMOP_ES_EXTRACT_DT
 else
-    Rscript $MAIN_COMMAND --id $CRDM_ID
+    Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID --zip_output $OMOP_ES_ZIP_OUTPUT
 fi
