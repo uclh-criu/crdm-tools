@@ -20,15 +20,20 @@ pull:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-  - name: null
+  - name: "omop_es-mock"
     version: null
     tags: []
     description: null
-    schedule: {}
+    schedules:
+      - cron: "*/5 * * * *" # every 5 minutes
     flow_name: null
-    entrypoint: null
-    parameters: {}
+    entrypoint: "run_omop_es.py:run_docker"
+    parameters:
+      project_name: "mock"
+      batched: false
+      settings_id: "mock_project_settings"
+      zip_output: false
     work_pool:
-      name: null
-      work_queue_name: null
+      name: omop_es-worker
+      work_queue_name: default
       job_variables: {}
