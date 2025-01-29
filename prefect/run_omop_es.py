@@ -38,7 +38,7 @@ def run_docker(
 
 @task()
 def build_docker(working_dir: Path) -> None:
-    args = ["docker", "compose", "build"]
+    args = ["docker", "compose", "build", "omop_es"]
     run_subprocess(working_dir, args)
 
 
