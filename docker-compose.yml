@@ -8,6 +8,7 @@ version: "3"
 services:
   omop_es:
     env_file: "./omop_es/.env"
+    platform: linux/amd64
     environment:
       - "HTTP_PROXY=${PROXY}"
       - "HTTPS_PROXY=${PROXY}"
@@ -32,6 +33,7 @@ services:
 
   omop-cascade:
     env_file: "./omop-cascade/.env"
+    platform: linux/amd64
     environment:
       - "HTTP_PROXY=${PROXY}"
       - "HTTPS_PROXY=${PROXY}"
