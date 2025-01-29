@@ -1,6 +1,7 @@
 import subprocess
 import datetime
 from pathlib import Path
+from typing import Optional
 
 from prefect import flow, task, runtime, logging
 
@@ -15,21 +16,36 @@ def name_with_timestamp() -> str:
 
 
 @flow(flow_run_name=name_with_timestamp, retries=2, retry_delay_seconds=300)
-def run_docker(input_data: str = "default") -> None:
+def run_docker(
+    project_name: str = "mock",
+    batched: str = "false",
+    settings_id: str = "mock_project_settings",
+    zip_output: Optional[bool] = False,
+    start_batch: Optional[str] = None,
+    extract_dt: Optional[str] = None,
+) -> None:
     build_docker(OMOP_ES_PATH)
-    write(ROOT_PATH, input_data)
+    run_omop_es(
+        ROOT_PATH,
+        project_name,
+        batched,
+        settings_id,
+        zip_output,
+        start_batch,
+        extract_dt,
+    )
 
 
 @task()
-def build_docker(project_path: Path) -> None:
+def build_docker(working_dir: Path) -> None:
     args = ["docker", "compose", "build"]
-    run_subprocess(project_path, args)
+    run_subprocess(working_dir, args)
 
 
-def run_subprocess(project_path: Path, args: list[str]) -> None:
+def run_subprocess(working_dir: Path, args: list[str]) -> None:
     """Helper to run subprocesses, logging stderr."""
     logger = logging.get_run_logger()
-    result = subprocess.run(args, cwd=project_path, capture_output=True, text=True)
+    result = subprocess.run(args, cwd=working_dir, capture_output=True, text=True)
     if result.returncode != 0:
         logger.error(result.stderr)
         raise subprocess.CalledProcessError(
@@ -39,23 +55,38 @@ def run_subprocess(project_path: Path, args: list[str]) -> None:
 
 
 @task(retries=3, retry_delay_seconds=120)
-def write(project_path: Path, input_data: str) -> None:
-    # FIXME: need correct input arguments
+def run_omop_es(
+    working_dir: Path,
+    project_name: str,
+    batched: str,
+    settings_id: str,
+    zip_output: Optional[bool],
+    start_batch: Optional[str],
+    extract_dt: Optional[str],
+) -> None:
     args = [
         "docker",
         "compose",
         "--project-name",
-        "project",
+        project_name,
         "run",
         "--remove-orphans",
-        "dummy_app",
-        "uv",
-        "run",
         "omop_es",
+        "bash",
+        "app/entrypoint.sh",
+        "--env",
+        f"OMOP_ES_BATCHED={batched}",
+        "--env",
+        f"OMOP_ES_SETTINGS_ID={settings_id}",
+        "--env",
+        f"OMOP_ES_START_BATCH={start_batch}",
+        "--env",
+        f"OMOP_ES_EXTRACT_DT={extract_dt}",
+        "--env",
+        f"OMOP_ES_ZIP_OUTPUT={zip_output}",
     ]
-    run_subprocess(project_path, args)
+    run_subprocess(working_dir, args)
 
 
 if __name__ == "__main__":
     run_docker()
-
