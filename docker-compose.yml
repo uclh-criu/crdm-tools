@@ -2,9 +2,6 @@
 #
 # project: crdm-tools
 # author: b.briotribeyre@nhs.net
-
-version: "3"
-
 services:
   omop_es:
     env_file: "./omop_es/.env"
