@@ -30,7 +30,7 @@ if [ ! -f $METADATA_VERSION ]; then
 fi
 #
 # Run the batched process if specified otherwise run the simple process
-# All the variables prefixed with CRDM are coming from the 'docker compose up' command line,
+# All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
 if $OMOP_ES_BATCHED; then
     Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID --start_batch $OMOP_ES_START_BATCH --extract_dt $OMOP_ES_EXTRACT_DT
