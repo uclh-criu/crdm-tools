@@ -36,7 +36,7 @@ def run_docker(
     )
 
 
-@task()
+@task(retries=10, retry_delay_seconds=10)
 def build_docker(working_dir: Path) -> None:
     args = ["docker", "compose", "build", "omop_es"]
     run_subprocess(working_dir, args)
@@ -54,7 +54,7 @@ def run_subprocess(working_dir: Path, args: list[str]) -> None:
     logger.debug(result.stderr)
 
 
-@task(retries=3, retry_delay_seconds=120)
+@task(retries=5, retry_=1800)
 def run_omop_es(
     working_dir: Path,
     project_name: str,
