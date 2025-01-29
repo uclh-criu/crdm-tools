@@ -15,7 +15,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
-RUN install2.r --error --deps TRUE --skipinstalled \
+RUN install2.r --error --skipinstalled \
     --repos http://cran.rstudio.com/ \
     devtools \
     tidyverse \
