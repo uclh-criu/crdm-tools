@@ -47,4 +47,7 @@ RUN install2.r --error --skipinstalled \
 
 RUN R -e "remotes::install_github('andysouth/omopcept')"
 
-ENTRYPOINT ["bash", "/app/entrypoint.sh"]
+COPY app/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]

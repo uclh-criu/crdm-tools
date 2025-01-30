@@ -41,4 +41,7 @@ RUN install2.r --error --skipinstalled \
     RPostgres \
     && rm -rf /tmp/downloaded_packages
 
-ENTRYPOINT ["bash", "/app/entrypoint.sh"]
+COPY app/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
