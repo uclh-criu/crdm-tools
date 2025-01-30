@@ -1,3 +1,4 @@
+# TODO: merge with omop_es/Dockerfile, use single image for both
 FROM rocker/tidyverse:4.4.2
 
 RUN apt update && \
@@ -44,4 +45,4 @@ RUN install2.r --error --skipinstalled \
 COPY app/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["/app/entrypoint.sh"]
