@@ -5,6 +5,12 @@
 services:
   omop_es:
     env_file: "./omop_es/.env"
+    build:
+      context: "./omop_es"
+      args:
+        - "FTP_PROXY=${PROXY}"
+        - "HTTP_PROXY=${PROXY}"
+        - "HTTPS_PROXY=${PROXY}"
     platform: linux/amd64
     environment:
       - "HTTP_PROXY=${PROXY}"
@@ -20,15 +26,15 @@ services:
       - "./omop_es/local:/share/local"
       - "sharefs6-criudata:/sharefs6/criudata/Live"
       - "sharefs7-crdm:/sharefs7/crdm/Shared"
+
+  omop-cascade:
+    env_file: "./omop-cascade/.env"
     build:
-      context: "./omop_es"
+      context: "./omop-cascade"
       args:
         - "FTP_PROXY=${PROXY}"
         - "HTTP_PROXY=${PROXY}"
         - "HTTPS_PROXY=${PROXY}"
-
-  omop-cascade:
-    env_file: "./omop-cascade/.env"
     platform: linux/amd64
     environment:
       - "HTTP_PROXY=${PROXY}"
@@ -40,12 +46,6 @@ services:
       - "./omop-cascade/local:/share/local"
       - "sharefs6-criudata:/sharefs6/criudata/Live"
       - "sharefs7-crdm:/sharefs7/crdm/Shared"
-    build:
-      context: "./omop-cascade"
-      args:
-        - "FTP_PROXY=${PROXY}"
-        - "HTTP_PROXY=${PROXY}"
-        - "HTTPS_PROXY=${PROXY}"
     network_mode: host
 
 volumes:
