@@ -29,6 +29,9 @@ fi
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
 
+# Recreate the mock database
+Rscript source_access/UCLH/mock_database/recreate_mockdb.R
+
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
