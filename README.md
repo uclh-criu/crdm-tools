@@ -1,5 +1,13 @@
 # crdm-tools
 
+This repository provides infrastructure tools to run
+[`omop_es`](https://github.com/uclh-criu/omop_es) and
+[`omop-cascade`](https://github.com/uclh-criu/omop-cascade) in
+containerised environments on the GAE.
+
+In addition, the [`prefect/` directory](prefect/README.md) provides data workflow orchestration with
+[Prefect](https://docs.prefect.io/v3/get-started/index) to allow automatic scheduling of `omop_es` runs.
+
 ## Running the containers for local development
 
 Set environment variables:
