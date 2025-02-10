@@ -14,8 +14,6 @@ services:
       file: docker-compose.yml
       service: omop-cascade
     volumes:
-      - "./omop_es/app:/app"
-      - "./omop_es/local:/share/local"
       - "sharefs6-criudata:/sharefs6/criudata/Live"
       - "sharefs7-crdm:/sharefs7/crdm/Shared"
 
