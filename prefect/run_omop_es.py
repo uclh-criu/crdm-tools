@@ -16,7 +16,7 @@ def name_with_timestamp() -> str:
 
 
 @flow(flow_run_name=name_with_timestamp, retries=2, retry_delay_seconds=300)
-def run_docker(
+def run_omop_es(
     project_name: str = "mock",
     batched: bool = False,
     settings_id: str = "mock_project_settings",
@@ -25,7 +25,7 @@ def run_docker(
     extract_dt: Optional[str] = None,
 ) -> None:
     build_docker(OMOP_ES_PATH)
-    run_omop_es(
+    run_omop_es_docker(
         ROOT_PATH,
         project_name,
         batched,
@@ -55,7 +55,7 @@ def run_subprocess(working_dir: Path, args: list[str]) -> None:
 
 
 @task(retries=5, retry_=1800)
-def run_omop_es(
+def run_omop_es_docker(
     working_dir: Path,
     project_name: str,
     batched: bool,
@@ -89,4 +89,4 @@ def run_omop_es(
 
 
 if __name__ == "__main__":
-    run_docker()
+    run_omop_es()

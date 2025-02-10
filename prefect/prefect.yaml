@@ -27,7 +27,7 @@ deployments:
     schedules:
       - cron: "*/5 * * * *" # every 5 minutes
     flow_name: null
-    entrypoint: "run_omop_es.py:run_docker"
+    entrypoint: "run_omop_es.py:run_omop_es"
     parameters:
       project_name: "mock"
       batched: false
