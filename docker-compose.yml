@@ -40,4 +40,3 @@ services:
       - "GITHUB_PAT=${GITHUB_PAT}"
     volumes:
       - "./omop-cascade/local:/share/local"
-    network_mode: host
