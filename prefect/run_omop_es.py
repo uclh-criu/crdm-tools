@@ -54,7 +54,7 @@ def run_subprocess(working_dir: Path, args: list[str]) -> None:
     logger.debug(result.stderr)
 
 
-@task(retries=5, retry_=1800)
+@task(retries=5, retry_delay_seconds=1800)
 def run_omop_es_docker(
     working_dir: Path,
     project_name: str,
