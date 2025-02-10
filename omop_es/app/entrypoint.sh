@@ -29,12 +29,6 @@ fi
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
 
-# Download the metadata files if they don't exist
-# TODO: can be removed after https://github.com/uclh-criu/omop_es/pull/145
-if [ ! -f $METADATA_VERSION ]; then
-	Rscript $METADATA_DOWNLOAD
-fi
-
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
