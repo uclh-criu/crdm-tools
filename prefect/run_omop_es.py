@@ -71,9 +71,6 @@ def run_omop_es_docker(
         project_name,
         "run",
         "--remove-orphans",
-        "omop_es",
-        "bash",
-        "app/entrypoint.sh",
         "--env",
         f"OMOP_ES_BATCHED={batched}",
         "--env",
@@ -84,6 +81,7 @@ def run_omop_es_docker(
         f"OMOP_ES_EXTRACT_DT={extract_dt}",
         "--env",
         f"OMOP_ES_ZIP_OUTPUT={zip_output}",
+        "omop_es",
     ]
     run_subprocess(working_dir, args)
 
