@@ -42,7 +42,7 @@ RUN install2.r --error --skipinstalled \
     RPostgres \
     && rm -rf /tmp/downloaded_packages
 
-COPY app/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+WORKDIR /app
+COPY --chmod=0755 app/entrypoint.sh .
 
 CMD ["/app/entrypoint.sh"]
