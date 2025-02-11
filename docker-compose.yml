@@ -8,13 +8,12 @@ services:
     build:
       context: "./omop_es"
       args:
-        - "FTP_PROXY=${PROXY}"
-        - "HTTP_PROXY=${PROXY}"
-        - "HTTPS_PROXY=${PROXY}"
+        - "HTTP_PROXY=${HTTP_PROXY}"
+        - "HTTPS_PROXY=${HTTPS_PROXY}"
     platform: linux/amd64
     environment:
-      - "HTTP_PROXY=${PROXY}"
-      - "HTTPS_PROXY=${PROXY}"
+      - "HTTP_PROXY=${HTTP_PROXY}"
+      - "HTTPS_PROXY=${HTTPS_PROXY}"
       - "OMOP_ES_SETTINGS_ID=${SETTINGS_ID}"
       - "OMOP_ES_BATCHED=${BATCHED}"
       - "OMOP_ES_START_BATCH=${START_BATCH}"
@@ -29,13 +28,12 @@ services:
     build:
       context: "./omop-cascade"
       args:
-        - "FTP_PROXY=${PROXY}"
-        - "HTTP_PROXY=${PROXY}"
-        - "HTTPS_PROXY=${PROXY}"
+        - "HTTP_PROXY=${HTTP_PROXY}"
+        - "HTTPS_PROXY=${HTTPS_PROXY}"
     platform: linux/amd64
     environment:
-      - "HTTP_PROXY=${PROXY}"
-      - "HTTPS_PROXY=${PROXY}"
+      - "HTTP_PROXY=${HTTP_PROXY}"
+      - "HTTPS_PROXY=${HTTPS_PROXY}"
       - "CRDM_ID=${ID}"
       - "GITHUB_PAT=${GITHUB_PAT}"
     volumes:
