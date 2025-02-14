@@ -1,0 +1,45 @@
+# Welcome to your prefect.yaml file! You can use this file for storing and managing
+# configuration for deploying your flows. We recommend committing this file to source
+# control along with your flow code.
+
+# Generic metadata about this project
+name: prefect
+prefect-version: 3.1.14
+
+# build section allows you to manage and build docker images
+build:
+
+# push section allows you to manage if and how this project is uploaded to remote locations
+push:
+
+# pull section allows you to provide instructions for cloning this project in remote locations
+pull:
+  - prefect.deployments.steps.set_working_directory:
+      # Use local current directory
+      directory: "{{ $PWD }}"
+
+# the deployments section allows you to provide configuration for deploying flows
+deployments:
+  - name: omop_es-mock
+    version:
+    tags: []
+    description:
+    schedules:
+      - cron: "*/10 * * * *"
+        timezone:
+        day_or: true
+        active: true
+    entrypoint: run_omop_es.py:run_omop_es
+    parameters:
+      project_name: mock
+      batched: false
+      settings_id: mock_project_settings
+      zip_output: false
+    work_pool:
+      name: omop_es-worker
+      work_queue_name: default
+      job_variables: {}
+    concurrency_limit:
+    pull:
+      - prefect.deployments.steps.set_working_directory:
+          directory: /Users/milan/Projects/SAFEHR-data/crdm-tools/prefect

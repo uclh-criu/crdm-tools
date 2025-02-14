@@ -1,0 +1,33 @@
+services:
+  omop_es:
+    extends:
+      file: docker-compose.yml
+      service: omop_es
+    volumes:
+      - "./omop_es/app:/app"
+      - "./omop_es/local:/share/local"
+      - "sharefs6-criudata:/sharefs6/criudata/Live"
+      - "sharefs7-crdm:/sharefs7/crdm/Shared"
+
+  omop-cascade:
+    extends:
+      file: docker-compose.yml
+      service: omop-cascade
+    volumes:
+      - "sharefs6-criudata:/sharefs6/criudata/Live"
+      - "sharefs7-crdm:/sharefs7/crdm/Shared"
+
+volumes:
+  sharefs6-criudata:
+    driver: "local"
+    driver_opts:
+      type: "cifs"
+      device: "${SHAREFS6_CRIUDATA}"
+      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}"
+
+  sharefs7-crdm:
+    driver: "local"
+    driver_opts:
+      type: "cifs"
+      device: "${SHAREFS7_CRDM}"
+      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}"

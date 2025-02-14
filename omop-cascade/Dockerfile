@@ -1,4 +1,5 @@
-FROM rocker/tidyverse:4.4.1
+# TODO: merge with omop_es/Dockerfile, use single image for both
+FROM rocker/tidyverse:4.4.2
 
 RUN apt update && \
     apt-get update && \
@@ -15,7 +16,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
-RUN install2.r --error --deps TRUE --skipinstalled \
+RUN install2.r --error --skipinstalled \
     --repos http://cran.rstudio.com/ \
     devtools \
     tidyverse \
@@ -41,4 +42,7 @@ RUN install2.r --error --deps TRUE --skipinstalled \
     RPostgres \
     && rm -rf /tmp/downloaded_packages
 
-ENTRYPOINT ["bash", "/app/entrypoint.sh"]
+WORKDIR /app
+COPY --chmod=0755 app/entrypoint.sh .
+
+CMD ["/app/entrypoint.sh"]

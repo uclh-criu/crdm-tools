@@ -1,0 +1,7 @@
+[project]
+name = "omop_es-prefect"
+version = "0.1.0"
+description = "Workflow scheduling with prefect"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["prefect>=3.1.14"]
