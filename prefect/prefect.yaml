@@ -39,7 +39,3 @@ deployments:
       name: omop_es-worker
       work_queue_name: default
       job_variables: {}
-    concurrency_limit:
-    pull:
-      - prefect.deployments.steps.set_working_directory:
-          directory: /Users/milan/Projects/SAFEHR-data/crdm-tools/prefect
