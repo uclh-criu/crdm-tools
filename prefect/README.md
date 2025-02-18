@@ -48,3 +48,27 @@ Note that this might result in duplicate runs, however.
 ## Configuring projects
 
 _Under construction_
+
+## Deploy Prefect on the GAE
+
+To run Prefect on the GAE, make sure to set the following environment variables in `prefect/.env`:
+
+```shell
+# For GAE14, will differ for other GAE instances
+PREFECT_SERVER_API_HOST=uclvlddpragae14
+PREFECT_SERVER_API_PORT=8081
+PREFECT_API_URL=http://uclvlddpragae14:8081/api
+```
+
+For unknown reasons, the GAE is unable to serve the Prefect server on the default `4200` port.
+With these settings, the dashboard will be hosted at `http://uclvlddpragae14:8081/dashboard`
+(accessible through the UCLH network only).
+
+When running `prefect` commands (see above) on the GAE, make sure to set the `NO_PROXY` environment
+variable for your session (setting it in `.env` is not enough):
+
+```shell
+# Run this for every new terminal session
+export NO_PROXY="localhost,127.0.0.1,uclvlddpragae14"
+```
+
