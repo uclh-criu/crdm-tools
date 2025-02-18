@@ -72,3 +72,4 @@ variable for your session (setting it in `.env` is not enough):
 export NO_PROXY="localhost,127.0.0.1,uclvlddpragae14"
 ```
 
+You could set this in your `~/.bashrc` to avoid having to set it manually every time.
