@@ -31,10 +31,11 @@ deployments:
         active: true
     entrypoint: run_omop_es.py:run_omop_es
     parameters:
-      project_name: mock
+      project_name: omop_es-mock
       batched: false
       settings_id: mock_project_settings
       zip_output: false
+    concurrency_limit: 1 # only run 1 instance of the same project at a time
     work_pool:
       name: omop_es-worker
       work_queue_name: default
