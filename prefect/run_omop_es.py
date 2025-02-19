@@ -6,7 +6,6 @@ from typing import Optional
 from prefect import flow, task, runtime, logging
 
 ROOT_PATH = Path(__file__).parents[1]
-OMOP_ES_PATH = ROOT_PATH / "omop_es"
 
 
 def name_with_timestamp() -> str:
@@ -23,7 +22,7 @@ def run_omop_es(
     start_batch: Optional[str] = None,
     extract_dt: Optional[str] = None,
 ) -> None:
-    build_docker(OMOP_ES_PATH)
+    build_docker(ROOT_PATH)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         batched=batched,
