@@ -22,7 +22,6 @@ services:
       - "GITHUB_PAT=${GITHUB_PAT}"
     volumes:
       - "./extract:/app/extract"
-      - "./omop_es/omop_metadata:/app/omop_es/omop_metadata"
 
   omop-cascade:
     env_file: "./omop-cascade/.env"
