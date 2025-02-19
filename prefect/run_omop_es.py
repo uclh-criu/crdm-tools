@@ -15,7 +15,7 @@ def name_with_timestamp() -> str:
     return f"{name}_{now.isoformat()}"
 
 
-@flow(flow_run_name=name_with_timestamp, retries=2, retry_delay_seconds=300)
+@flow(flow_run_name=name_with_timestamp)
 def run_omop_es(
     project_name: str = "mock",
     batched: bool = False,
