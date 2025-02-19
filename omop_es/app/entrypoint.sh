@@ -38,7 +38,7 @@ if [ "$OMOP_ES_BATCHED" = true ]; then
 	Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID --start_batch $OMOP_ES_START_BATCH --extract_dt $OMOP_ES_EXTRACT_DT
 else
 	echo "Running omop_es for ${OMOP_ES_SETTINGS_ID}..."
-	if ["$OMOP_ES_ZIP_OUTPUT" = true]; then
+	if [ "$OMOP_ES_ZIP_OUTPUT" = true ]; then
 		echo "Zipping output..."
 		Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID --zip_output
 	else
