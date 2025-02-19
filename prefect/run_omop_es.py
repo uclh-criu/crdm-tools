@@ -26,13 +26,13 @@ def run_omop_es(
 ) -> None:
     build_docker(OMOP_ES_PATH)
     run_omop_es_docker(
-        ROOT_PATH,
-        project_name,
-        batched,
-        settings_id,
-        zip_output,
-        start_batch,
-        extract_dt,
+        working_dir=ROOT_PATH,
+        project_name=project_name,
+        batched=batched,
+        settings_id=settings_id,
+        zip_output=zip_output,
+        start_batch=start_batch,
+        extract_dt=extract_dt,
     )
 
 
