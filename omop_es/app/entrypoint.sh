@@ -8,7 +8,7 @@ set -euxo pipefail
 # Define all variables
 # Git variables are coming from the '.env' file
 FULL_GIT_URL="https://${GITHUB_PAT}@github.com/${GITHUB_REPO}.git"
-OMOP_ES_DIR="/omop_es"
+OMOP_ES_DIR="omop_es"
 # The following variables are relative to the OMOP_ES directory
 METADATA_VERSION="./omop_metadata/metadata_version.txt"
 METADATA_DOWNLOAD="./omop_metadata/download_omop_metadata.R"
