@@ -31,7 +31,6 @@ deployments:
         active: true
     entrypoint: run_omop_es.py:run_omop_es
     parameters:
-      project_name: omop_es-mock
       batched: false
       settings_id: mock_project_settings
       zip_output: false
