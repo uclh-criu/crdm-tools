@@ -60,7 +60,7 @@ PREFECT_API_URL=http://uclvlddpragae10:8081/api
 ```
 
 For unknown reasons, the GAE is unable to serve the Prefect server on the default `4200` port.
-With these settings, the dashboard will be hosted at `http://uclvlddpragae14:8081/dashboard`
+With these settings, the dashboard will be hosted at `http://uclvlddpragae10:8081/dashboard`
 (accessible through the UCLH network only).
 
 When running `prefect` commands (see above) on a GAE, make sure the GAE's address is included in
