@@ -6,7 +6,6 @@ from typing import Optional
 from prefect import flow, task, runtime, logging
 
 ROOT_PATH = Path(__file__).parents[1]
-OMOP_ES_PATH = ROOT_PATH / "omop_es"
 
 
 def name_with_timestamp() -> str:
@@ -15,24 +14,22 @@ def name_with_timestamp() -> str:
     return f"{name}_{now.isoformat()}"
 
 
-@flow(flow_run_name=name_with_timestamp, retries=2, retry_delay_seconds=300)
+@flow(flow_run_name=name_with_timestamp)
 def run_omop_es(
-    project_name: str = "mock",
     batched: bool = False,
     settings_id: str = "mock_project_settings",
     zip_output: Optional[bool] = False,
     start_batch: Optional[str] = None,
     extract_dt: Optional[str] = None,
 ) -> None:
-    build_docker(OMOP_ES_PATH)
+    build_docker(ROOT_PATH)
     run_omop_es_docker(
-        ROOT_PATH,
-        project_name,
-        batched,
-        settings_id,
-        zip_output,
-        start_batch,
-        extract_dt,
+        working_dir=ROOT_PATH,
+        batched=batched,
+        settings_id=settings_id,
+        zip_output=zip_output,
+        start_batch=start_batch,
+        extract_dt=extract_dt,
     )
 
 
@@ -57,7 +54,6 @@ def run_subprocess(working_dir: Path, args: list[str]) -> None:
 @task(retries=5, retry_delay_seconds=1800)
 def run_omop_es_docker(
     working_dir: Path,
-    project_name: str,
     batched: bool,
     settings_id: str,
     zip_output: Optional[bool],
@@ -68,7 +64,7 @@ def run_omop_es_docker(
         "docker",
         "compose",
         "--project-name",
-        project_name,
+        "omop_es-prefect",
         "run",
         "--remove-orphans",
         "--env",
