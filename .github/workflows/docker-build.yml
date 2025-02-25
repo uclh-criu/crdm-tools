@@ -1,0 +1,30 @@
+name: Build Docker Images
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["docker-compose.yml", "docker/Dockerfile"]
+  pull_request:
+    branches: ["main"]
+    paths: ["docker-compose.yml", "docker/Dockerfile"]
+  workflow_dispatch:
+
+# Only run actions on the most recent push to a branch
+concurrency:
+  group: "${{ github.workflow }}-${{ github.head_ref }}"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [omop_es, omop-cascade]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: |
+          cp template.env .env
+          docker compose build ${{ matrix.image }}
