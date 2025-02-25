@@ -6,7 +6,8 @@ services:
   omop_es:
     env_file: "./omop_es/.env"
     build:
-      context: "./omop_es"
+      context: "./docker"
+      target: omop_es
       args:
         - "HTTP_PROXY=${HTTP_PROXY}"
         - "HTTPS_PROXY=${HTTPS_PROXY}"
@@ -26,7 +27,8 @@ services:
   omop-cascade:
     env_file: "./omop-cascade/.env"
     build:
-      context: "./omop-cascade"
+      context: "./docker"
+      target: omop-cascade
       args:
         - "HTTP_PROXY=${HTTP_PROXY}"
         - "HTTPS_PROXY=${HTTPS_PROXY}"
