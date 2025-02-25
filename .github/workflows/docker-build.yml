@@ -27,4 +27,6 @@ jobs:
       - name: Build the Docker image
         run: |
           cp template.env .env
+          cp omop_es/template.env omop_es/.env
+          cp omop-cascade/template.env omop-cascade/.env
           docker compose build ${{ matrix.image }}
