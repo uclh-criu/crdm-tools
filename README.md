@@ -8,6 +8,22 @@ containerised environments on the GAE.
 In addition, the [`prefect/` directory](prefect/README.md) provides data workflow orchestration with
 [Prefect](https://docs.prefect.io/v3/get-started/index) to allow automatic scheduling of `omop_es` runs.
 
+## Building the images
+
+Use `docker compose build` to build all images, or specify the image to build.
+
+### `omop_es`
+
+```shell
+docker compose build omop_es
+```
+
+### `omop-cascade`
+
+```shell
+docker compose build omop-cascade
+```
+
 ## Running the containers for local development
 
 Set environment variables:
