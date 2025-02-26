@@ -2,33 +2,16 @@
 
 set -euxo pipefail
 
-# Used to debug R libraries
-# Rscript /app/test_libraries.R
-#
 # Define all variables
 # Git variables are coming from the '.env' file
-FULL_GIT_URL="https://${GITHUB_PAT}@github.com/${GITHUB_REPO}.git"
 OMOP_ES_DIR="omop_es"
+
 # The following variables are relative to the OMOP_ES directory
 MAIN_BATCHED="./main_batched.R"
 MAIN_COMMAND="./main_command.R"
-#
-# Clone the GitHub repo if it doesn't exist,
-# otherwise pull the latest version of the specified branch
-# error if cloning or pulling fails
-if [ ! -d $OMOP_ES_DIR ]; then
-	echo "Cloning GitHub repo ${GITHUB_REPO}@${GIT_BRANCH}"
-	git clone -b $GIT_BRANCH $FULL_GIT_URL $OMOP_ES_DIR || (echo "Failed to clone repo" && exit 1)
-else
-	echo "Pulling GitHub repo ${GITHUB_REPO}@${GIT_BRANCH}"
-	git -C $OMOP_ES_DIR pull $FULL_GIT_URL $GIT_BRANCH || (echo "Failed to pull repo" && exit 1)
-fi
 
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
-
-# Recreate the mock database
-Rscript source_access/UCLH/mock_database/recreate_mockdb.R
 
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
