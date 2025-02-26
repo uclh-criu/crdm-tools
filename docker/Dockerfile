@@ -1,4 +1,4 @@
-FROM rocker/tidyverse:4.4.2 as base
+FROM rocker/tidyverse:4.4.2 AS base
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
@@ -50,16 +50,33 @@ RUN R -e "remotes::install_github('andysouth/omopcept')"
 ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
 
-USER docker
 WORKDIR /app
 
-# omop_es
-FROM base as omop_es
+
+# omop_es-builder
+# using multi-stage build so the GitHub PAT is not present in the final image
+FROM base AS omop_es-builder
+
+ARG OMOP_ES_BRANCH
+ARG GITHUB_PAT
+
+RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
+# TODO: download metadata
+
+# Final omop_es iamge
+FROM base AS omop_es
+
+COPY --from=omop_es-builder /app/omop_es /app/omop_es
 COPY --chmod=0755 ./omop_es.sh .
+
+USER docker
 CMD ["/app/omop_es.sh"]
 
+
 # omop-cascade
-FROM base as omop-cascade
+FROM base AS omop-cascade
 COPY --chmod=0755 ./omop-cascade.sh .
+
+USER docker
 CMD ["/app/omop-cascade.sh"]
 
