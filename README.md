@@ -36,9 +36,10 @@ cp omop-cascade/template.env omop-cascade/.env
 ```
 
 ```shell
-docker compose --project-name <PROJECT-NAME> run --build omop_es \
+docker compose --project-name <PROJECT-NAME> run --build \
     --env OMOP_ES_SETTINGS_ID=<SETTINGS_ID>
-    --env ...
+    --env ... \
+    omop_es
 ```
 
 ## Running the containers in production
