@@ -27,10 +27,11 @@ services:
       context: "./docker"
       target: omop_es
       args:
-        <<: *build-args-common
+        <<: [*build-args-common, *github-pat]
+        OMOP_ES_BRANCH: ${OMOP_ES_BRANCH:-master}
     platform: linux/amd64
     environment:
-      <<: [*proxy-common, *github-pat]
+      <<: *proxy-common
       OMOP_ES_SETTINGS_ID: "${SETTINGS_ID}"
       OMOP_ES_BATCHED: "${BATCHED}"
       OMOP_ES_START_BATCH: "${START_BATCH}"
@@ -45,10 +46,10 @@ services:
       context: "./docker"
       target: omop-cascade
       args:
-        <<: *build-args-common
+        <<: [*build-args-common, *github-pat]
     platform: linux/amd64
     environment:
-      <<: [*proxy-common, *github-pat]
+      <<: *proxy-common
       CRDM_ID: "${ID}"
     volumes:
       - "./omop-cascade/local:/share/local"
