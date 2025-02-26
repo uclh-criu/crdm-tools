@@ -44,22 +44,22 @@ RUN install2.r --error --skipinstalled \
     remotes \
     && rm -rf /tmp/downloaded_packages
 
+RUN R -e "remotes::install_github('andysouth/omopcept')"
+
 # Add docker user
 ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
 
 USER docker
+WORKDIR /app
 
 # omop_es
 FROM base as omop_es
-RUN R -e "remotes::install_github('andysouth/omopcept')"
-WORKDIR /app
 COPY --chmod=0755 ./omop_es.sh .
 CMD ["/app/omop_es.sh"]
 
 # omop-cascade
 FROM base as omop-cascade
-WORKDIR /app
 COPY --chmod=0755 ./omop-cascade.sh .
 CMD ["/app/omop-cascade.sh"]
 
