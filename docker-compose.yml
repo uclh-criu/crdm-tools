@@ -47,6 +47,7 @@ services:
       target: omop-cascade
       args:
         <<: [*build-args-common, *github-pat]
+        OMOP_CASCADE_BRANCH: ${OMOP_CASCADE_BRANCH:-master}
     platform: linux/amd64
     environment:
       <<: *proxy-common
