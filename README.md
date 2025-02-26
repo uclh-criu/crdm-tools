@@ -36,7 +36,7 @@ cp omop-cascade/template.env omop-cascade/.env
 ```
 
 ```shell
-docker compose --project-name <PROJECT-NAME> run omop_es \
+docker compose --project-name <PROJECT-NAME> run --build omop_es \
     --env OMOP_ES_SETTINGS_ID=<SETTINGS_ID>
     --env ...
 ```
@@ -48,7 +48,7 @@ Adjust the `.env` files accordingly.
 ### `omop_es`
 
 ```shell
-docker compose -f docker-compose.prod.yml --project-name <PROJECT-NAME> run \
+docker compose -f docker-compose.prod.yml --project-name <PROJECT-NAME> run --build \
     --env OMOP_ES_SETTINGS_ID=<SETTINGS_ID> \
     --env ... \
     omop_es
