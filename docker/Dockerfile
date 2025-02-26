@@ -44,6 +44,12 @@ RUN install2.r --error --skipinstalled \
     remotes \
     && rm -rf /tmp/downloaded_packages
 
+# Add docker user
+ARG DOCKER_USER_GID
+RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
+
+USER docker
+
 # omop_es
 FROM base as omop_es
 RUN R -e "remotes::install_github('andysouth/omopcept')"

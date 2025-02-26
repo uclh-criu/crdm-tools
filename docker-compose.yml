@@ -1,7 +1,25 @@
-# docker-compose file
-#
-# project: crdm-tools
-# author: b.briotribeyre@nhs.net
+# Common variables
+x-http-proxy: &http-proxy ${HTTP_PROXY}
+x-https-proxy: &https-proxy ${HTTPS_PROXY}
+x-no-proxy: &no-proxy localhost,0.0.0.0,127.0.0.1,uclvlddpragae10
+
+x-proxy-common: &proxy-common
+  HTTP_PROXY: *http-proxy
+  http_proxy: *http-proxy
+  HTTPS_PROXY: *https-proxy
+  https_proxy: *https-proxy
+  NO_PROXY: *no-proxy
+  no_proxy: *no-proxy
+
+x-docker-gid: &docker-gid
+  DOCKER_USER_GID: ${DOCKER_USER_GID}
+
+x-build-args-common: &build-args-common
+    <<: [*proxy-common, *docker-gid]
+
+x-github-pat: &github-pat
+  GITHUB_PAT: ${GITHUB_PAT}
+
 services:
   omop_es:
     env_file: "./omop_es/.env"
@@ -9,12 +27,10 @@ services:
       context: "./docker"
       target: omop_es
       args:
-        - "HTTP_PROXY=${HTTP_PROXY}"
-        - "HTTPS_PROXY=${HTTPS_PROXY}"
+        <<: *build-args-common
     platform: linux/amd64
     environment:
-      - "HTTP_PROXY=${HTTP_PROXY}"
-      - "HTTPS_PROXY=${HTTPS_PROXY}"
+      <<: [*proxy-common, *github-pat]
       - "OMOP_ES_SETTINGS_ID=${SETTINGS_ID}"
       - "OMOP_ES_BATCHED=${BATCHED}"
       - "OMOP_ES_START_BATCH=${START_BATCH}"
@@ -22,7 +38,7 @@ services:
       - "OMOP_ES_ZIP_OUTPUT=${ZIP_OUTPUT}"
       - "GITHUB_PAT=${GITHUB_PAT}"
     volumes:
-      - "./extract:/app/extract"
+      - "./extract:/app/extract:ro"
 
   omop-cascade:
     env_file: "./omop-cascade/.env"
@@ -30,12 +46,10 @@ services:
       context: "./docker"
       target: omop-cascade
       args:
-        - "HTTP_PROXY=${HTTP_PROXY}"
-        - "HTTPS_PROXY=${HTTPS_PROXY}"
+        <<: *build-args-common
     platform: linux/amd64
     environment:
-      - "HTTP_PROXY=${HTTP_PROXY}"
-      - "HTTPS_PROXY=${HTTPS_PROXY}"
+      <<: [*proxy-common, *github-pat]
       - "CRDM_ID=${ID}"
       - "GITHUB_PAT=${GITHUB_PAT}"
     volumes:
