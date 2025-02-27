@@ -57,6 +57,10 @@ ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
 
 WORKDIR /app
+RUN chown -R docker:docker /app && \
+    chmod -R g+rwXs /app
+USER docker
+
 
 # omop_es-builder
 # using multi-stage build so the GitHub PAT is not present in the final image
@@ -74,10 +78,8 @@ RUN Rscript omop_metadata/download_omop_metadata.R && \
 # Final omop_es iamge
 FROM base AS omop_es
 
-COPY --from=omop_es-builder /app/omop_es /app/omop_es
+COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app/omop_es
 COPY --chmod=0755 ./omop_es.sh .
-
-USER docker
 
 CMD ["/app/omop_es.sh"]
 
@@ -98,6 +100,5 @@ FROM base AS omop-cascade
 
 COPY --from=omop-cascade-builder /app/omop-cascade /app/omop-cascade
 
-USER docker
 WORKDIR /app/omop-cascade
 CMD ["sh", "-c", "Rscript import_omop.R --id=${CRDM_ID}"]
