@@ -97,8 +97,7 @@ RUN git clone -b ${OMOP_CASCADE_BRANCH} \
 FROM base AS omop-cascade
 
 COPY --from=omop-cascade-builder /app/omop-cascade /app/omop-cascade
-COPY --chmod=0755 ./omop-cascade.sh .
 
 USER docker
 WORKDIR /app/omop-cascade
-CMD ["sh", "-c", "Rscript import_omop.R --id ${CRDM_ID}"]
+CMD ["sh", "-c", "Rscript import_omop.R --id=${CRDM_ID}"]
