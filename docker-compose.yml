@@ -51,6 +51,6 @@ services:
     platform: linux/amd64
     environment:
       <<: *proxy-common
-      CRDM_ID: "${ID}"
+      CRDM_ID: "${CRDM_ID}"
     volumes:
       - "./omop-cascade/local:/share/local"
