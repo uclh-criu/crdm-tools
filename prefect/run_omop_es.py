@@ -66,7 +66,7 @@ def run_omop_es_docker(
         "--project-name",
         "omop_es-prefect",
         "run",
-        "--remove-orphans",
+        "--rm",
         "--env",
         f"OMOP_ES_BATCHED={batched}",
         "--env",
