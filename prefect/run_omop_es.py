@@ -14,7 +14,7 @@ def name_with_timestamp() -> str:
     return f"{name}_{now.isoformat()}"
 
 
-@flow(flow_run_name=name_with_timestamp)
+@flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
     batched: bool = False,
     settings_id: str = "mock_project_settings",
@@ -48,6 +48,7 @@ def run_subprocess(working_dir: Path, args: list[str]) -> None:
         raise subprocess.CalledProcessError(
             result.returncode, args, output=result.stdout, stderr=result.stderr
         )
+    logger.info(result.stdout)
     logger.debug(result.stderr)
 
 
