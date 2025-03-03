@@ -1,9 +1,10 @@
-import subprocess
 import datetime
 from pathlib import Path
 from typing import Optional
 
-from prefect import flow, task, runtime, logging
+from prefect import flow, runtime, task
+
+from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
 
@@ -37,31 +38,6 @@ def run_omop_es(
 def build_docker(working_dir: Path) -> None:
     args = ["docker", "compose", "build", "omop_es"]
     run_subprocess(working_dir, args)
-
-
-def run_subprocess(working_dir: Path, args: list[str]) -> None:
-    """Helper to run subprocesses, logging stderr."""
-    logger = logging.get_run_logger()
-    with subprocess.Popen(
-        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=working_dir
-    ) as proc:
-        out = []
-
-        for line in iter(proc.stdout.readline, b"") if proc.stdout else []:
-            logger.info(line.decode().strip())
-            out.append(str(line))
-
-        _, stderr = proc.communicate()
-
-    stdout = "\n".join(out)
-    result = subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
-
-    if result.returncode != 0:
-        logger.error(result.stderr)
-        raise subprocess.CalledProcessError(
-            result.returncode, args, output=stdout, stderr=stderr
-        )
-    logger.debug(result.stderr)
 
 
 @task(retries=5, retry_delay_seconds=1800)
