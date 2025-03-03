@@ -42,13 +42,25 @@ def build_docker(working_dir: Path) -> None:
 def run_subprocess(working_dir: Path, args: list[str]) -> None:
     """Helper to run subprocesses, logging stderr."""
     logger = logging.get_run_logger()
-    result = subprocess.run(args, cwd=working_dir, capture_output=True, text=True)
+    with subprocess.Popen(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=working_dir
+    ) as proc:
+        out = []
+
+        for line in iter(proc.stdout.readline, b"") if proc.stdout else []:
+            logger.info(line.decode().strip())
+            out.append(str(line))
+
+        _, stderr = proc.communicate()
+
+    stdout = "\n".join(out)
+    result = subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
+
     if result.returncode != 0:
         logger.error(result.stderr)
         raise subprocess.CalledProcessError(
-            result.returncode, args, output=result.stdout, stderr=result.stderr
+            result.returncode, args, output=stdout, stderr=stderr
         )
-    logger.info(result.stdout)
     logger.debug(result.stderr)
 
 
