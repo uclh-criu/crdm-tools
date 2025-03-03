@@ -16,6 +16,11 @@ help: ## Show this help
         | column -t -s '|'
 	@echo
 
+clean:   ## Stop and clean Prefect services
+	$(MAKE) stop-pool
+	$(MAKE) stop-server
+	$(MAKE) reset-prefect-database
+
 deploy-all: start-pool ## Deploy all Prefect flows and start a worker
 	uv run --env-file .env prefect deploy --all
 	$(MAKE) start-worker
@@ -35,6 +40,9 @@ start-server: uv-exists ## Start the Prefect server
 
 stop-server: uv-exists ## Stop the Prefect server
 	uv run --env-file .env prefect server stop
+
+stop-pool: uv-exists ## Stop the Prefect worker pool
+	-uv run --env-file .env prefect work-pool delete '${POOL_NAME}' # allow failure in case pool does not exist
 
 reset-prefect-database: uv-exists ## Reset the Prefect database
 	uv run --env-file .env prefect server database reset -y
