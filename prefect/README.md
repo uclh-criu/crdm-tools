@@ -44,6 +44,21 @@ uv run --env-file .env prefect deployment run 'run-omop-es/omop_es-mock'
 
 Note that this might result in duplicate runs, however.
 
+## Using the `Makefile`
+
+Alternatively, all the above commands can be run through `make`. Run `make help` to see the available commands.
+To quickly spin up the server, start a worker pool and deploy all flows, run:
+
+```shell
+make deploy-all
+```
+
+Note that this will run the `prefect` server in the background. To stop it, run
+
+```shell
+make stop-server
+```
+
 ## Configuring projects
 
 _Under construction_
