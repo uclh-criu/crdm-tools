@@ -1,9 +1,10 @@
-import subprocess
 import datetime
 from pathlib import Path
 from typing import Optional
 
-from prefect import flow, task, runtime, logging
+from prefect import flow, runtime, task
+
+from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
 
@@ -14,7 +15,7 @@ def name_with_timestamp() -> str:
     return f"{name}_{now.isoformat()}"
 
 
-@flow(flow_run_name=name_with_timestamp)
+@flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
     batched: bool = False,
     settings_id: str = "mock_project_settings",
@@ -37,18 +38,6 @@ def run_omop_es(
 def build_docker(working_dir: Path) -> None:
     args = ["docker", "compose", "build", "omop_es"]
     run_subprocess(working_dir, args)
-
-
-def run_subprocess(working_dir: Path, args: list[str]) -> None:
-    """Helper to run subprocesses, logging stderr."""
-    logger = logging.get_run_logger()
-    result = subprocess.run(args, cwd=working_dir, capture_output=True, text=True)
-    if result.returncode != 0:
-        logger.error(result.stderr)
-        raise subprocess.CalledProcessError(
-            result.returncode, args, output=result.stdout, stderr=result.stderr
-        )
-    logger.debug(result.stderr)
 
 
 @task(retries=5, retry_delay_seconds=1800)
