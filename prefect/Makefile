@@ -7,7 +7,7 @@ define assert_command_exists
 	fi
 endef
 
-POOL_NAME := omop_es-worker
+POOL_NAME := omop_es-mock-worker
 
 help: ## Show this help
 	@echo

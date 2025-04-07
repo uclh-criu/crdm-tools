@@ -37,6 +37,6 @@ deployments:
       zip_output: false
     concurrency_limit: 1 # only run 1 instance of the same project at a time
     work_pool:
-      name: omop_es-worker
+      name: omop_es-mock-worker
       work_queue_name: default
       job_variables: {}
