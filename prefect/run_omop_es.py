@@ -7,12 +7,12 @@ from prefect import flow, runtime, task
 from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
+DEPLOYMENT_NAME = runtime.deployment.name
 
 
 def name_with_timestamp() -> str:
-    name = runtime.deployment.name
     now = datetime.datetime.now(datetime.timezone.utc)
-    return f"{name}_{now.isoformat()}"
+    return f"{DEPLOYMENT_NAME}_{now.isoformat()}"
 
 
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
@@ -37,6 +37,7 @@ def run_omop_es(
 @task(retries=10, retry_delay_seconds=10)
 def build_docker(working_dir: Path) -> None:
     args = ["docker", "compose", "build", "omop_es"]
+    args = ["docker", "compose", "--project-name", DEPLOYMENT_NAME, "build", "omop_es"]
     run_subprocess(working_dir, args)
 
 
@@ -53,7 +54,7 @@ def run_omop_es_docker(
         "docker",
         "compose",
         "--project-name",
-        "omop_es-prefect",
+        DEPLOYMENT_NAME,
         "run",
         "--rm",
         "--env",
