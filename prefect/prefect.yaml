@@ -31,7 +31,7 @@ deployments:
         active: true
     entrypoint: run_omop_es.py:run_omop_es
     parameters:
-      build_args: [--"build-arg", "OMOP_ES_BRANCH=master"]
+      build_args: [--build-arg, "OMOP_ES_BRANCH=master"]
       batched: false
       settings_id: mock_project_settings
       zip_output: false
