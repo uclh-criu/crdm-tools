@@ -45,16 +45,20 @@ RUN install2.r --error --skipinstalled \
     readr \
     readxl \
     remotes \
+    renv \
     rjson \
     rlang \
     zip \
     && rm -rf /tmp/downloaded_packages
 
-RUN R -e "remotes::install_github('andysouth/omopcept')"
-
 # Add docker user
 ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
+
+# Set ownership of /home/docker as this is where renv will store its cache
+RUN mkdir /home/docker && \
+    chown -R docker:docker /home/docker && \
+    chmod -R g+rwXs /home/docker
 
 WORKDIR /app
 RUN chown -R docker:docker /app && \
@@ -72,13 +76,17 @@ ARG GITHUB_PAT
 RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
-RUN Rscript omop_metadata/download_omop_metadata.R && \
+RUN Rscript -e "renv::restore()" && \
+    Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
 
 # Final omop_es iamge
 FROM base AS omop_es
 
+ARG RENV_CACHE=/home/docker/.cache/R/renv
+
 COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app/omop_es
+COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 ${RENV_CACHE} ${RENV_CACHE}
 COPY --chmod=0755 ./omop_es.sh .
 
 CMD ["/app/omop_es.sh"]
