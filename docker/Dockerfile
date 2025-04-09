@@ -70,7 +70,7 @@ USER docker
 # using multi-stage build so the GitHub PAT is not present in the final image
 FROM base AS omop_es-builder
 
-ARG OMOP_ES_BRANCH
+ARG OMOP_ES_BRANCH=master
 ARG GITHUB_PAT
 
 RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es

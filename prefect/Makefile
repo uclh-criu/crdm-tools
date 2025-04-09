@@ -7,7 +7,7 @@ define assert_command_exists
 	fi
 endef
 
-POOL_NAME := omop_es-worker
+POOL_NAME := omop_es-mock-worker
 
 help: ## Show this help
 	@echo
@@ -16,9 +16,12 @@ help: ## Show this help
         | column -t -s '|'
 	@echo
 
-clean:   ## Stop and clean Prefect services
+stop:    ## Stop Prefect services
 	$(MAKE) stop-pool
 	$(MAKE) stop-server
+
+clean:   ## Stop Prefect services and reset the database
+	$(MAKE) stop
 	$(MAKE) reset-prefect-database
 
 deploy-all: start-pool ## Deploy all Prefect flows and start a worker

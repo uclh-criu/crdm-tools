@@ -1,29 +1,30 @@
 import datetime
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from prefect import flow, runtime, task
 
 from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
+DEPLOYMENT_NAME = runtime.deployment.name
 
 
 def name_with_timestamp() -> str:
-    name = runtime.deployment.name
     now = datetime.datetime.now(datetime.timezone.utc)
-    return f"{name}_{now.isoformat()}"
+    return f"{DEPLOYMENT_NAME}_{now.isoformat()}"
 
 
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
+    build_args: List[str] = [],
     batched: bool = False,
     settings_id: str = "mock_project_settings",
     zip_output: Optional[bool] = False,
     start_batch: Optional[str] = None,
     extract_dt: Optional[str] = None,
 ) -> None:
-    build_docker(ROOT_PATH)
+    build_docker(ROOT_PATH, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         batched=batched,
@@ -35,8 +36,9 @@ def run_omop_es(
 
 
 @task(retries=10, retry_delay_seconds=10)
-def build_docker(working_dir: Path) -> None:
-    args = ["docker", "compose", "build", "omop_es"]
+def build_docker(working_dir: Path, build_args: List[str]) -> None:
+    args = ["docker", "compose", "--project-name", DEPLOYMENT_NAME, "build", "omop_es"]
+    args += build_args
     run_subprocess(working_dir, args)
 
 
@@ -53,7 +55,7 @@ def run_omop_es_docker(
         "docker",
         "compose",
         "--project-name",
-        "omop_es-prefect",
+        DEPLOYMENT_NAME,
         "run",
         "--rm",
         "--env",
