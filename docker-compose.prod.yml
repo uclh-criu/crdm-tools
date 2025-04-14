@@ -23,11 +23,11 @@ volumes:
     driver_opts:
       type: "cifs"
       device: "${SHAREFS6_CRIUDATA}"
-      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}"
+      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD},rw"
 
   sharefs7-crdm:
     driver: "local"
     driver_opts:
       type: "cifs"
       device: "${SHAREFS7_CRDM}"
-      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD}"
+      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD},rw"
