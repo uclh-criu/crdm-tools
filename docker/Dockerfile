@@ -65,7 +65,6 @@ RUN chown -R docker:docker /app && \
     chmod -R g+rwXs /app
 USER docker
 
-
 # omop_es-builder
 # using multi-stage build so the GitHub PAT is not present in the final image
 FROM base AS omop_es-builder
@@ -76,8 +75,13 @@ ARG GITHUB_PAT
 RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
-RUN Rscript -e "renv::restore()" && \
-    Rscript omop_metadata/download_omop_metadata.R && \
+# Its a bit dumb but let's use the cache if we get a network error
+RUN Rscript -e "renv::restore()" || \
+    Rscript -e "renv::restore()" || \
+    Rscript -e "renv::restore()" || \
+    Rscript -e "renv::restore()"
+
+RUN Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
 
 # Final omop_es iamge
