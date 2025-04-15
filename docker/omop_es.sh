@@ -16,15 +16,18 @@ cd $OMOP_ES_DIR
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
+
+echo "Running omop_es for ${OMOP_ES_SETTINGS_ID}..."
 if [ "$OMOP_ES_BATCHED" = true ]; then
-	echo "Running batched omop_es for ${OMOP_ES_SETTINGS_ID}..."
-	Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID --start_batch $OMOP_ES_START_BATCH --extract_dt $OMOP_ES_EXTRACT_DT
+    echo "Running batched omop_es..."
+    CMD="Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID"
+    # Add on extra CLI arguments if they're filled
+    [ -n "$OMOP_ES_START_BATCH" ] && [ -n "$OMOP_ES_EXTRACT_DT" ] && CMD="$CMD --start_batch $OMOP_ES_START_BATCH --extract_dt $OMOP_ES_EXTRACT_DT"
 else
-	echo "Running omop_es for ${OMOP_ES_SETTINGS_ID}..."
-	if [ "$OMOP_ES_ZIP_OUTPUT" = true ]; then
-		echo "Zipping output..."
-		Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID --zip_output
-	else
-		Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID
-	fi
+    CMD="Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID"
+    ## Add on extra CLI arguments if they're filled
+    [ "$OMOP_ES_ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
 fi
+
+$CMD
+
