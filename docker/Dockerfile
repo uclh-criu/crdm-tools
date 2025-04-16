@@ -39,6 +39,7 @@ RUN install2.r --error --skipinstalled \
     jsonvalidate \
     log4r \
     lubridate \
+    nanoarrow \
     odbc \
     processx \
     purrr \
