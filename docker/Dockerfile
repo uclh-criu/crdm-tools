@@ -72,7 +72,6 @@ FROM base AS omop_es-builder
 ARG OMOP_ES_BRANCH=master
 ARG GITHUB_PAT
 
-RUN echo "tmp"
 RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
