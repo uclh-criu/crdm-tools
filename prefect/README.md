@@ -1,8 +1,7 @@
 # Scheduling pipeline runs with Prefect
 
->[!WARNING]
+> [!WARNING]
 > EXPERIMENTAL
-
 
 ## Quickstart
 
@@ -47,16 +46,29 @@ Note that this might result in duplicate runs, however.
 ## Using the `Makefile`
 
 Alternatively, all the above commands can be run through `make`. Run `make help` to see the available commands.
-To quickly spin up the server, start a worker pool and deploy all flows, run:
+
+To spin up the server run:
+
+```shell
+make start-server
+```
+
+Then in a different terminal window/session you can start a worker pool and deploy all flows, by running:
 
 ```shell
 make deploy-all
 ```
 
-Note that this will run the `prefect` server in the background. To stop it, run
+To stop everything (including the server):
 
 ```shell
-make stop-server
+make stop
+```
+
+To just stop the worker pool and keep the server up:
+
+```shell
+make stop-pool
 ```
 
 ## Configuring projects
@@ -70,12 +82,12 @@ To run Prefect on the GAE, make sure to set the following environment variables 
 ```shell
 # For GAE10, will differ for other GAE instances
 PREFECT_SERVER_API_HOST=uclvlddpragae10
-PREFECT_SERVER_API_PORT=8081
-PREFECT_API_URL=http://uclvlddpragae10:8081/api
+PREFECT_SERVER_API_PORT=8082
+PREFECT_API_URL=http://uclvlddpragae10:8082/api
 ```
 
 For unknown reasons, the GAE is unable to serve the Prefect server on the default `4200` port.
-With these settings, the dashboard will be hosted at `http://uclvlddpragae10:8081/dashboard`
+With these settings, the dashboard will be hosted at `http://uclvlddpragae10:8082/dashboard`
 (accessible through the UCLH network only).
 
 When running `prefect` commands (see above) on a GAE, make sure the GAE's address is included in
@@ -85,3 +97,12 @@ the `NO_PROXY` environment variable in the `prefect/.env` file and run `uv` with
 ```shell
 NO_PROXY="localhost,127.0.0.1,uclvlddpragae10"
 ```
+
+## Management the running instance on the GAE
+
+🚧 _Under development - Work in progress_
+
+We currently don't run Prefect in Docker but in simple processes in `tmux` on GAE10.
+
+This might change in the future, but for now it means that the person running the server needs to take it down, ensure all processes are killed, and remove the `/tmp/runner_storage` directory if it exists before someone else can start the server.
+(Other users won't have permission to write to a `/tmp` subdirectory that they didn't create.)
