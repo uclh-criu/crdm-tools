@@ -84,8 +84,6 @@ def run_omop_es_docker(
         DEPLOYMENT_NAME,
         "run",
         "--rm",
-        "--env",
-        "--env",
         "omop_es",
     ]
     return run_subprocess(working_dir, args)
