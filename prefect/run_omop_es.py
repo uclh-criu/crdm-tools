@@ -73,6 +73,11 @@ def run_omop_es_docker(
     extract_dt: Optional[str],
 ) -> subprocess.CompletedProcess:
     args = [
+        f"OMOP_ES_BATCHED={batched}",
+        f"OMOP_ES_SETTINGS_ID={settings_id}",
+        f"OMOP_ES_START_BATCH={start_batch}",
+        f"OMOP_ES_EXTRACT_DT={extract_dt}",
+        f"OMOP_ES_ZIP_OUTPUT={zip_output}",
         "docker",
         "compose",
         "--project-name",
@@ -80,15 +85,7 @@ def run_omop_es_docker(
         "run",
         "--rm",
         "--env",
-        f"OMOP_ES_BATCHED={batched}",
         "--env",
-        f"OMOP_ES_SETTINGS_ID={settings_id}",
-        "--env",
-        f"OMOP_ES_START_BATCH={start_batch}",
-        "--env",
-        f"OMOP_ES_EXTRACT_DT={extract_dt}",
-        "--env",
-        f"OMOP_ES_ZIP_OUTPUT={zip_output}",
         "omop_es",
     ]
     return run_subprocess(working_dir, args)
