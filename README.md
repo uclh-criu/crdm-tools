@@ -37,7 +37,7 @@ cp omop-cascade/template.env omop-cascade/.env
 
 ```shell
 docker compose --project-name <PROJECT-NAME> run --build \
-    --env OMOP_ES_SETTINGS_ID=<SETTINGS_ID>
+    --env SETTINGS_ID=<SETTINGS_ID>
     --env ... \
     omop_es
 ```
@@ -50,11 +50,10 @@ Adjust the `.env` files accordingly.
 
 ```shell
 docker compose -f docker-compose.prod.yml --project-name <PROJECT-NAME> run --build \
-    --env OMOP_ES_SETTINGS_ID=<SETTINGS_ID> \
+    --env SETTINGS_ID=<SETTINGS_ID> \
     --env ... \
     omop_es
 ```
-
 
 ## Access to private GitHub repos from GAE
 
