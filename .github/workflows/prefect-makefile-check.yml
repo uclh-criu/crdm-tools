@@ -1,4 +1,4 @@
-name: Check the Prefect §Makefile
+name: Check the Prefect Makefile
 
 on:
   push:
