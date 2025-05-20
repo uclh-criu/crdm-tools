@@ -7,8 +7,8 @@ set -euxo pipefail
 OMOP_ES_DIR="omop_es"
 
 # The following variables are relative to the OMOP_ES directory
-MAIN_BATCHED="./main_batched.R"
-MAIN_COMMAND="./main_command.R"
+MAIN_BATCHED="./main/batched.R"
+MAIN_COMMAND="./main/command.R"
 
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
@@ -22,7 +22,7 @@ if [ "$OMOP_ES_BATCHED" = true ]; then
     echo "Running batched omop_es..."
     CMD="Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID"
     # Add on extra CLI arguments if they're filled
-    [ -n "$OMOP_ES_START_BATCH" ] && [ -n "$OMOP_ES_EXTRACT_DT" ] && CMD="$CMD --start_batch $OMOP_ES_START_BATCH --extract_dt $OMOP_ES_EXTRACT_DT"
+    [ -n "$OMOP_ES_OUTPUT_DIRECTORY" ] && CMD="$CMD --output-directory $OMOP_ES_OUTPUT_DIRECTORY"
 else
     CMD="Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID"
     ## Add on extra CLI arguments if they're filled
