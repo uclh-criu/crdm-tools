@@ -19,7 +19,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
-          version: "latest"
+          version: "v0.6.1"
 
       - name: Run smoke check of Makefile
         working-directory: ./prefect
