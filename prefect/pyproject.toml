@@ -4,4 +4,4 @@ version = "0.1.0"
 description = "Workflow scheduling with prefect"
 readme = "README.md"
 requires-python = "==3.12.7"
-dependencies = ["prefect>=3.1.14"]
+dependencies = ["prefect>=3.1.14", "pytest"]
