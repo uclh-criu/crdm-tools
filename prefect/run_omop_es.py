@@ -46,8 +46,9 @@ def run_omop_es(
 
 @task(retries=10, retry_delay_seconds=10)
 def build_docker(
-    working_dir: Path, build_args: List[str] = [], dry_run: bool = False
+    working_dir: Path, build_args: Optional[List[str]] = None, dry_run: bool = False
 ) -> None:
+    build_args = build_args or []
     args = [
         "docker",
         "compose",
