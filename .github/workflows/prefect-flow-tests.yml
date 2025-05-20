@@ -1,0 +1,27 @@
+name: Run tests on our Prefect flow and task code
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["prefect/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["prefect/**"]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+
+      - name: Run pytest
+        working-directory: ./prefect
+        run: |
+          make test
