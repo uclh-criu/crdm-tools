@@ -1,4 +1,4 @@
-name: Check the Prefect Makefile
+name: Run tests of Prefect flow and task code
 
 on:
   push:
@@ -21,11 +21,7 @@ jobs:
         with:
           version: "0.6.1"
 
-      - name: Run smoke check of Makefile
+      - name: Run pytest
         working-directory: ./prefect
         run: |
-          make help
-          make uv-exists
-          make start-server --dry-run
-          make deploy-all --dry-run
-          make clean --dry-run
+          make test

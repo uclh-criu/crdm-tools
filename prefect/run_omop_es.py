@@ -11,8 +11,15 @@ DEPLOYMENT_NAME = runtime.deployment.name
 
 
 def name_with_timestamp() -> str:
+    """Generate a name for the flow run with a timestamp."""
     now = datetime.datetime.now(datetime.timezone.utc)
     return f"{DEPLOYMENT_NAME}_{now.isoformat()}"
+
+
+def dry_run_if(condition: bool):
+    """Optionally yield the dry-run flag for docker compose commands."""
+    if condition:
+        yield "--dry-run"
 
 
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
@@ -23,8 +30,9 @@ def run_omop_es(
     zip_output: Optional[bool] = False,
     start_batch: Optional[str] = None,
     extract_dt: Optional[str] = None,
+    dry_run: bool = False,
 ) -> None:
-    build_docker(ROOT_PATH, build_args=build_args)
+    build_docker(ROOT_PATH, build_args=build_args, dry_run=dry_run)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         batched=batched,
@@ -32,12 +40,24 @@ def run_omop_es(
         zip_output=zip_output,
         start_batch=start_batch,
         extract_dt=extract_dt,
+        dry_run=dry_run,
     )
 
 
 @task(retries=10, retry_delay_seconds=10)
-def build_docker(working_dir: Path, build_args: List[str]) -> None:
-    args = ["docker", "compose", "--project-name", DEPLOYMENT_NAME, "build", "omop_es"]
+def build_docker(
+    working_dir: Path, build_args: Optional[List[str]] = None, dry_run: bool = False
+) -> None:
+    build_args = build_args or []
+    args = [
+        "docker",
+        "compose",
+        *dry_run_if(dry_run),
+        "--project-name",
+        DEPLOYMENT_NAME,
+        "build",
+        "omop_es",
+    ]
     args += build_args
     run_subprocess(working_dir, args)
 
@@ -50,10 +70,12 @@ def run_omop_es_docker(
     zip_output: Optional[bool],
     start_batch: Optional[str],
     extract_dt: Optional[str],
+    dry_run: bool = False,
 ) -> None:
     args = [
         "docker",
         "compose",
+        *dry_run_if(dry_run),
         "--project-name",
         DEPLOYMENT_NAME,
         "run",

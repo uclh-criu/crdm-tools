@@ -1,3 +1,10 @@
 # Ignore environment files
 **/.env
 extract/
+
+# Ignore python files
+__pycache__
+*.pyc
+
+# Ignore text editor files
+.vscode
