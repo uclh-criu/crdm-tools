@@ -14,9 +14,11 @@ _LOG_MESSAGES_AND_EXPECTED_LEVELS = [
     ("[ERROR] This is an error message", "ERROR"),
 ]
 
+
 @pytest.mark.parametrize(
     "message, expected_level",
-    _LOG_MESSAGES_AND_EXPECTED_LEVELS + [
+    _LOG_MESSAGES_AND_EXPECTED_LEVELS
+    + [
         # Some extra test cases
         ("[CRITICAL] This is a critical message", "CRITICAL"),
         ("[UNKNOWN] This is an unknown level message", "UNKNOWN"),
@@ -25,32 +27,38 @@ _LOG_MESSAGES_AND_EXPECTED_LEVELS = [
     ],
 )
 def test_log_level_extraction(message, expected_level):
-    assert run_subprocess.extract_log_level(message) == expected_level, f"Expected '{expected_level}' for message '{message}'"
+    assert run_subprocess.extract_log_level(message) == expected_level, (
+        f"Expected '{expected_level}' for message '{message}'"
+    )
+
 
 @pytest.mark.parametrize(
     "message, expected_level",
-    _LOG_MESSAGES_AND_EXPECTED_LEVELS + [
+    _LOG_MESSAGES_AND_EXPECTED_LEVELS
+    + [
         # Unknown levels should default to INFO
         ("[UNKNOWN] This is an unknown level message", "INFO"),
         ("[FLIBBLE] This is a nonsense level message", "INFO"),
-        ("This is a message without a level", "INFO"), 
+        ("This is a message without a level", "INFO"),
     ],
 )
 def test_log(caplog, message, expected_level):
     caplog.clear()
-    caplog.set_level(logging.NOTSET) # Log everything
+    caplog.set_level(logging.NOTSET)  # Log everything
 
-    message_in_bytes = bytes(message, 'utf-8')
+    message_in_bytes = bytes(message, "utf-8")
     run_subprocess.log(message_in_bytes, logging.getLogger())
 
     assert len(caplog.records) == 1, "Expected one log record"
     assert message in caplog.text, f"Expected message '{message}' in log"
-    assert caplog.records[0].levelname == expected_level, f"Expected log level '{expected_level}'"
+    assert caplog.records[0].levelname == expected_level, (
+        f"Expected log level '{expected_level}'"
+    )
 
 
 # See https://docs.prefect.io/v3/develop/test-workflows#unit-testing-tasks for
 # how to test tasks (or sub functions) outside of a flow context.
-# 
+#
 # > If your task uses a logger, you can disable the logger to avoid the
 # > RuntimeError raised from a missing flow context.
 

@@ -1,4 +1,4 @@
-name: Run tests on our Prefect flow and task code
+name: Run tests of Prefect flow and task code
 
 on:
   push:
