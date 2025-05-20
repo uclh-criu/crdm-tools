@@ -51,12 +51,13 @@ stop-pool: uv-exists ## Stop the Prefect worker pool
 reset-prefect-database: uv-exists ## Reset the Prefect database
 	$(UVRUN) prefect server database reset -y
 
-test: uv-exists
+test: uv-exists ## Run tests of our Prefect functionality
 	uv run pytest .
+
+fast-test: uv-exists ## Run tests of our Prefect functionality skipping the ones marked as slow
+	uv run pytest . -m "not slow" 
 
 uv-exists: ## Check if uv is available
 	$(call assert_command_exists, uv, "Please install uv: https://docs.astral.sh/uv/getting-started/installation/")
-
-
 
 .SILENT:  # all targets
