@@ -1,4 +1,5 @@
 import datetime
+import subprocess
 from pathlib import Path
 from typing import List, Optional
 
@@ -7,7 +8,7 @@ from prefect import flow, runtime, task
 from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
-DEPLOYMENT_NAME = runtime.deployment.name
+DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
 
 
 def name_with_timestamp() -> str:
@@ -70,12 +71,10 @@ def run_omop_es_docker(
     zip_output: Optional[bool],
     start_batch: Optional[str],
     extract_dt: Optional[str],
-    dry_run: bool = False,
-) -> None:
+) -> subprocess.CompletedProcess:
     args = [
         "docker",
         "compose",
-        *dry_run_if(dry_run),
         "--project-name",
         DEPLOYMENT_NAME,
         "run",
@@ -92,7 +91,7 @@ def run_omop_es_docker(
         f"OMOP_ES_ZIP_OUTPUT={zip_output}",
         "omop_es",
     ]
-    run_subprocess(working_dir, args)
+    return run_subprocess(working_dir, args)
 
 
 if __name__ == "__main__":
