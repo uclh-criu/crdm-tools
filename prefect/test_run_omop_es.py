@@ -76,7 +76,8 @@ def wrapped_run_subrocess(*args, **kwargs):
     return run_subprocess.run_subprocess(*args, **kwargs)
 
 
-@pytest.mark.skip("Reproduces crdm-tools/#26.")
+
+
 def test_run_omop_es_docker_sets_env_correctly(mocker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
@@ -90,8 +91,16 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
             extract_dt=None,
         )
 
-    assert "OMOP_ES_SETTINGS_ID=mock_project_settings" in result.stdout, (
-        f"Setting ID not propagated: {result.stdout}"
-    )
-    assert "OMOP_ES_BATCHED=False" in result.stdout, "Batched flag not propagated"
-    # TODO: the rest of these!
+    # String values of the arguments we passed into the function 👆
+    expected_env_values = {
+        "OMOP_ES_SETTINGS_ID": "mock_project_settings",
+        "OMOP_ES_BATCHED": "False",
+        "OMOP_ES_ZIP_OUTPUT": "False",
+        "OMOP_ES_START_BATCH": "",
+        "OMOP_ES_EXTRACT_DT": "",
+    }
+    
+    for var, expected_value in expected_env_values.items():
+        assert f"{var}={expected_value}" in result.stdout, (
+            f"Environment variable {var} not set correctly: {result.stdout}"
+        )
