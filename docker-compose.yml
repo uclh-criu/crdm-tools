@@ -34,9 +34,9 @@ services:
       <<: *proxy-common
       OMOP_ES_SETTINGS_ID: "${SETTINGS_ID}"
       OMOP_ES_BATCHED: "${BATCHED}"
-      OMOP_ES_START_BATCH: "${START_BATCH}"
-      OMOP_ES_EXTRACT_DT: "${EXTRACT_DT}"
+      OMOP_ES_OUTPUT_DIRECTORY: "${OUTPUT_DIRECTORY}"
       OMOP_ES_ZIP_OUTPUT: "${ZIP_OUTPUT}"
+      TZ: Europe/London
     volumes:
       - "./extract:/app/extract"
 
@@ -52,5 +52,6 @@ services:
     environment:
       <<: *proxy-common
       CRDM_ID: "${CRDM_ID}"
+      TZ: Europe/London
     volumes:
       - "./omop-cascade/local:/share/local"
