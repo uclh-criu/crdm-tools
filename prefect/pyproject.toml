@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Workflow scheduling with prefect"
 readme = "README.md"
 requires-python = "==3.12.7"
-dependencies = ["prefect>=3.1.14", "pytest", "pytest-freezer"]
+dependencies = ["prefect>=3.1.14", "pytest", "pytest-freezer", "pytest-mock"]
 
 [tool.pytest.ini_options]
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
