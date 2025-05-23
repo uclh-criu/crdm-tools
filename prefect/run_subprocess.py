@@ -8,7 +8,9 @@ from prefect import logging
 from prefect.logging.loggers import LoggingAdapter
 
 
-def run_subprocess(working_dir: Path, args: list[str], env: Optional[dict] = None) -> subprocess.CompletedProcess:
+def run_subprocess(
+    working_dir: Path, args: list[str], env: Optional[dict] = None
+) -> subprocess.CompletedProcess:
     """Helper to run subprocesses, logging stderr."""
     logger = logging.get_run_logger()
     with subprocess.Popen(

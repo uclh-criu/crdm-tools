@@ -76,8 +76,6 @@ def wrapped_run_subrocess(*args, **kwargs):
     return run_subprocess.run_subprocess(*args, **kwargs)
 
 
-
-
 def test_run_omop_es_docker_sets_env_correctly(mocker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
@@ -99,7 +97,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         "OMOP_ES_START_BATCH": "",
         "OMOP_ES_EXTRACT_DT": "",
     }
-    
+
     for var, expected_value in expected_env_values.items():
         assert f"{var}={expected_value}" in result.stdout, (
             f"Environment variable {var} not set correctly: {result.stdout}"
