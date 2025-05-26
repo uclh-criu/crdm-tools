@@ -80,7 +80,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
     with prefect_test_harness():
-        result = run_omop_es.run_omop_es_docker(
+        result = no_prefect_retries(run_omop_es.run_omop_es_docker)(
             working_dir=run_omop_es.ROOT_PATH,
             batched=False,
             settings_id="mock_project_settings",
