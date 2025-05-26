@@ -79,8 +79,8 @@ def wrapped_run_subrocess(*args, **kwargs):
 def test_run_omop_es_docker_sets_env_correctly(mocker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
-    with disable_run_logger():
-        result = run_omop_es.run_omop_es_docker.fn(
+    with prefect_test_harness():
+        result = run_omop_es.run_omop_es_docker(
             working_dir=run_omop_es.ROOT_PATH,
             batched=False,
             settings_id="mock_project_settings",
