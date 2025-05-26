@@ -72,7 +72,6 @@ FROM base AS omop_es-builder
 
 ARG OMOP_ES_BRANCH=master
 ARG GITHUB_PAT
-
 RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
@@ -84,6 +83,9 @@ RUN Rscript -e "renv::restore()" || \
 
 RUN Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
+# Allow for an extra pull if the branch is updated without having to do renv restore from the start
+RUN git pull origin ${OMOP_ES_BRANCH}
+RUN Rscript -e "renv::restore()"
 
 # Final omop_es iamge
 FROM base AS omop_es
