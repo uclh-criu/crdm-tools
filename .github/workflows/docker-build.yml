@@ -24,27 +24,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Create .env files
+      - name: Build the Docker image
+        env:
+          OMOP_ES_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         run: |
           cp template.env .env
           cp omop_es/template.env omop_es/.env
           cp omop-cascade/template.env omop-cascade/.env
-
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-        with:
-          version: latest
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build the Docker image
-        env:
-          OMOP_ES_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
-        uses: docker/bake-action@v6
-        with:
-          files: docker-compose.yml
-          targets: ${{ matrix.image }}
-          set: |
-            *.cache-from=type=gha,scope=${{ matrix.image }}
-            *.cache-to=type=gha,mode=max,scope=${{ matrix.image }}
+          docker compose build ${{ matrix.image }} --build-arg GITHUB_PAT=${OMOP_ES_PAT}
