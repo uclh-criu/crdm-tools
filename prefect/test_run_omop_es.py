@@ -49,7 +49,7 @@ def test_build_docker_in_prefect():
 
 
 @pytest.mark.slow
-def test_build_docker_outside_prefect():
+def test_build_docker():
     with disable_run_logger():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
