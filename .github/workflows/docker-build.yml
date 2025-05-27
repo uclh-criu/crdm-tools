@@ -35,16 +35,15 @@ jobs:
         with:
           version: latest
 
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-        with:
-          version: latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build the Docker image
         env:
           OMOP_ES_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         uses: docker/build-push-action@v6
         with:
+          context: ${{ matrix.image }}
           push: false
           tags: ${{ matrix.image }}:latest
           cache-from: type=gha
