@@ -44,7 +44,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: docker
-          push: false
+          load: true
           tags: ${{ matrix.image }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max #     docker compose build ${{ matrix.image }} --build-arg GITHUB_PAT=${OMOP_ES_PAT}
