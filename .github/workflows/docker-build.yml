@@ -41,10 +41,10 @@ jobs:
       - name: Build the Docker image
         env:
           OMOP_ES_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
-        uses: docker/build-push-action@v6
+        uses: docker/bake-action@v6
         with:
-          context: docker
-          load: true
-          tags: ${{ matrix.image }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max #     docker compose build ${{ matrix.image }} --build-arg GITHUB_PAT=${OMOP_ES_PAT}
+          files: docker-compose.yml
+          targets: ${{ matrix.image }}
+          set: |
+            *.cache-from=type=gha,scope=${{ matrix.image }}
+            *.cache-to=type=gha,mode=max,scope=${{ matrix.image }}
