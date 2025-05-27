@@ -43,7 +43,7 @@ jobs:
           OMOP_ES_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.image }}
+          context: docker
           push: false
           tags: ${{ matrix.image }}:latest
           cache-from: type=gha
