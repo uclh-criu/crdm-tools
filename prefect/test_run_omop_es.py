@@ -24,23 +24,6 @@ def test_star_dry_run_if():
     assert command_without == ["docker", "compose", "do-thing"]
 
 
-def no_prefect_retries(func: Task) -> Task:
-    # A Prefect-decorated flow/task function has 10 retries: we don't want that in a test.
-    _func = copy(func)
-    _func.retries = 0
-    return _func
-
-
-@pytest.mark.slow
-def test_build_docker_in_prefect():
-    # Can actually consider deleting this since it's the same as the test below
-    with prefect_test_harness():
-        no_prefect_retries(run_omop_es.build_docker)(
-            working_dir=run_omop_es.ROOT_PATH,
-            dry_run=True,
-        )
-
-
 # See https://docs.prefect.io/v3/develop/test-workflows#unit-testing-tasks for
 # how to test tasks (or sub functions) outside of a flow context.
 #
