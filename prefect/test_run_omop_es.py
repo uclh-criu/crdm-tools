@@ -81,3 +81,4 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     for var, expected_value in expected_env_values.items():
         assert f"{var}={expected_value}" in result.stdout, (
             f"Environment variable {var} not set correctly: {result.stdout}"
+        )
