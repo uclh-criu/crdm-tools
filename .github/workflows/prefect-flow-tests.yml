@@ -28,6 +28,12 @@ jobs:
           cp omop-cascade/template.env omop-cascade/.env
           cp prefect/template.env prefect/.env
 
+      - name: Cache uv's venv
+        id: cache-uv-venv
+        uses: actions/cache@v4
+        with:
+          path: prefect/.venv
+
       - name: Run pytest
         working-directory: ./prefect
         run: |
