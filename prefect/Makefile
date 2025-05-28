@@ -52,7 +52,7 @@ reset-prefect-database: uv-exists ## Reset the Prefect database
 	$(UVRUN) prefect server database reset -y
 
 test: uv-exists ## Run tests of our Prefect functionality
-	$(UVRUN) pytest . --log-cli-level=DEBUG -s
+	$(UVRUN) pytest . --log-cli-level=INFO -s
 
 fast-test: uv-exists ## Run tests of our Prefect functionality skipping the ones marked as slow
 	$(UVRUN) pytest . -m "not slow"
