@@ -32,9 +32,8 @@ def run_omop_es(
     zip_output: Optional[bool] = False,
     start_batch: Optional[str] = None,
     extract_dt: Optional[str] = None,
-    dry_run: bool = False,  # could remove?
 ) -> None:
-    build_docker(ROOT_PATH, build_args=build_args, dry_run=dry_run)
+    build_docker(ROOT_PATH, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         batched=batched,
