@@ -1,6 +1,6 @@
 # Common variables
-x-http-proxy: &http-proxy ${HTTP_PROXY}
-x-https-proxy: &https-proxy ${HTTPS_PROXY}
+x-http-proxy: &http-proxy ${HTTP_PROXY:-}
+x-https-proxy: &https-proxy ${HTTPS_PROXY:-}
 x-no-proxy: &no-proxy localhost,0.0.0.0,127.0.0.1,uclvlddpragae10
 
 x-proxy-common: &proxy-common

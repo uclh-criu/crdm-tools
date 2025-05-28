@@ -1,8 +1,5 @@
 import pytest
 from freezegun import freeze_time
-from copy import copy
-from prefect.testing.utilities import prefect_test_harness
-from prefect.tasks import Task
 from prefect.logging import disable_run_logger
 
 import run_subprocess
@@ -24,23 +21,6 @@ def test_star_dry_run_if():
     assert command_without == ["docker", "compose", "do-thing"]
 
 
-def no_prefect_retries(func: Task) -> Task:
-    # A Prefect-decorated flow/task function has 10 retries: we don't want that in a test.
-    _func = copy(func)
-    _func.retries = 0
-    return _func
-
-
-@pytest.mark.slow
-def test_build_docker_in_prefect():
-    # Can actually consider deleting this since it's the same as the test below
-    with prefect_test_harness():
-        no_prefect_retries(run_omop_es.build_docker)(
-            working_dir=run_omop_es.ROOT_PATH,
-            dry_run=True,
-        )
-
-
 # See https://docs.prefect.io/v3/develop/test-workflows#unit-testing-tasks for
 # how to test tasks (or sub functions) outside of a flow context.
 #
@@ -49,7 +29,7 @@ def test_build_docker_in_prefect():
 
 
 @pytest.mark.slow
-def test_build_docker_outside_prefect():
+def test_build_docker():
     with disable_run_logger():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
@@ -79,8 +59,8 @@ def wrapped_run_subrocess(*args, **kwargs):
 def test_run_omop_es_docker_sets_env_correctly(mocker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
-    with prefect_test_harness():
-        result = no_prefect_retries(run_omop_es.run_omop_es_docker)(
+    with disable_run_logger():
+        result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             batched=False,
             settings_id="mock_project_settings",
@@ -101,4 +81,3 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     for var, expected_value in expected_env_values.items():
         assert f"{var}={expected_value}" in result.stdout, (
             f"Environment variable {var} not set correctly: {result.stdout}"
-        )

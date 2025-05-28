@@ -16,49 +16,15 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
 
-
-RUN install2.r --error --skipinstalled \
-    --repos http://cran.rstudio.com/ \
-    DBI \
-    R.utils \
-    R6 \
-    RPostgres \
-    RSQLite \
-    arrow \
-    assertr \
-    assertthat \
-    bit64 \
-    chron \
-    cli \
-    config \
-    dbplyr \
-    devtools \
-    glue \
-    here \
-    janitor \
-    jsonvalidate \
-    log4r \
-    lubridate \
-    nanoarrow \
-    odbc \
-    processx \
-    purrr \
-    readr \
-    readxl \
-    remotes \
-    renv \
-    rjson \
-    rlang \
-    zip \
-    && rm -rf /tmp/downloaded_packages
-
 # Add docker user
 ARG DOCKER_USER_GID
-RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
+RUN groupadd --gid $DOCKER_USER_GID docker && useradd --create-home --gid $DOCKER_USER_GID docker
+RUN install2.r --error --skipinstalled \
+    --repos http://cran.rstudio.com/ \
+    renv
 
 # Set ownership of /home/docker as this is where renv will store its cache
-RUN mkdir /home/docker && \
-    chown -R docker:docker /home/docker && \
+RUN chown -R docker:docker /home/docker && \
     chmod -R g+rwXs /home/docker
 
 WORKDIR /app
@@ -76,10 +42,10 @@ RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/om
 
 WORKDIR /app/omop_es
 # Its a bit dumb but let's use the cache if we get a network error
-RUN Rscript -e "renv::restore()" || \
-    Rscript -e "renv::restore()" || \
-    Rscript -e "renv::restore()" || \
-    Rscript -e "renv::restore()"
+RUN Rscript -e "options(Ncpus=4); renv::restore()" || \
+    Rscript -e "options(Ncpus=4); renv::restore()" || \
+    Rscript -e "options(Ncpus=4); renv::restore()" || \
+    Rscript -e "options(Ncpus=4); renv::restore()"
 
 RUN Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
@@ -87,7 +53,7 @@ RUN Rscript omop_metadata/download_omop_metadata.R && \
 RUN git pull origin ${OMOP_ES_BRANCH}
 RUN Rscript -e "renv::restore()"
 
-# Final omop_es iamge
+# Final omop_es image
 FROM base AS omop_es
 
 ARG RENV_CACHE=/home/docker/.cache/R/renv
@@ -112,6 +78,35 @@ RUN git clone -b ${OMOP_CASCADE_BRANCH} \
 
 # omop-cascade
 FROM base AS omop-cascade
+
+USER root
+RUN install2.r --error --skipinstalled \
+    --repos http://cran.rstudio.com/ \
+    devtools \
+    tidyverse \
+    here \
+    config \
+    R.utils \
+    odbc \
+    DBI \
+    arrow \
+    lubridate \
+    glue \
+    dbplyr \
+    assertr \
+    chron \
+    RSQLite \
+    bit64 \
+    rjson \
+    log4r \
+    R6 \
+    cli \
+    janitor \
+    purrr \
+    RPostgres \
+    && rm -rf /tmp/downloaded_packages
+
+USER docker
 
 COPY --from=omop-cascade-builder --chmod=0775 /app/omop-cascade /app
 WORKDIR /app
