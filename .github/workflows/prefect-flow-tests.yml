@@ -20,6 +20,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "0.6.1"
+          enable-cache: true
 
       - name: Use template environment files
         run: |
@@ -27,13 +28,6 @@ jobs:
           cp omop_es/template.env omop_es/.env
           cp omop-cascade/template.env omop-cascade/.env
           cp prefect/template.env prefect/.env
-
-      - name: Cache uv's venv
-        id: cache-uv-venv
-        uses: actions/cache@v4
-        with:
-          path: prefect/.venv
-          key: uv-venv
 
       - name: Run pytest
         working-directory: ./prefect
