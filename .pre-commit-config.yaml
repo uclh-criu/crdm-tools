@@ -22,13 +22,15 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
 
-  - repo: https://github.com/SAFEHR-data/PIXL
+  - repo: https://github.com/johannsdg/pre-commit-license-headers
+    rev: v0.1.0
     hooks:
-      - id: copyright-headers
-        name: copyright-headers
-        language: script
-        types_or: [python, shell, yaml, dockerfile]
-        entry: bin/linters/check_headers_exist.sh
+      - id: check-license-headers
+        args:
+          - "--template"
+          - |
+            Copyright (c) University College London Hospitals NHS Foundation Trust
+            Licensed under the Apache License, Version 2.0 (the "License");
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.7
