@@ -22,6 +22,14 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
 
+  - repo: https://github.com/SAFEHR-data/PIXL
+    hooks:
+      - id: copyright-headers
+        name: copyright-headers
+        language: script
+        types_or: [python, shell, yaml, dockerfile]
+        entry: bin/linters/check_headers_exist.sh
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.7
     hooks:
