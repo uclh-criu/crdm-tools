@@ -1,3 +1,4 @@
+import os
 import datetime
 import subprocess
 from pathlib import Path
@@ -31,9 +32,8 @@ def run_omop_es(
     zip_output: Optional[bool] = False,
     start_batch: Optional[str] = None,
     extract_dt: Optional[str] = None,
-    dry_run: bool = False,
 ) -> None:
-    build_docker(ROOT_PATH, build_args=build_args, dry_run=dry_run)
+    build_docker(ROOT_PATH, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         batched=batched,
@@ -41,7 +41,6 @@ def run_omop_es(
         zip_output=zip_output,
         start_batch=start_batch,
         extract_dt=extract_dt,
-        dry_run=dry_run,
     )
 
 
@@ -72,26 +71,32 @@ def run_omop_es_docker(
     start_batch: Optional[str],
     extract_dt: Optional[str],
 ) -> subprocess.CompletedProcess:
+    env = os.environ.copy()
+    env["OMOP_ES_BATCHED"] = str(batched)
+    env["OMOP_ES_SETTINGS_ID"] = settings_id
+    env["OMOP_ES_START_BATCH"] = start_batch if start_batch else ""
+    env["OMOP_ES_EXTRACT_DT"] = extract_dt if extract_dt else ""
+    env["OMOP_ES_ZIP_OUTPUT"] = str(zip_output) if zip_output is not None else ""
     args = [
         "docker",
         "compose",
         "--project-name",
         DEPLOYMENT_NAME,
         "run",
+        "--env",
+        "OMOP_ES_SETTINGS_ID",
+        "--env",
+        "OMOP_ES_BATCHED",
+        "--env",
+        "OMOP_ES_ZIP_OUTPUT",
+        "--env",
+        "OMOP_ES_START_BATCH",
+        "--env",
+        "OMOP_ES_EXTRACT_DT",
         "--rm",
-        "--env",
-        f"OMOP_ES_BATCHED={batched}",
-        "--env",
-        f"OMOP_ES_SETTINGS_ID={settings_id}",
-        "--env",
-        f"OMOP_ES_START_BATCH={start_batch}",
-        "--env",
-        f"OMOP_ES_EXTRACT_DT={extract_dt}",
-        "--env",
-        f"OMOP_ES_ZIP_OUTPUT={zip_output}",
         "omop_es",
     ]
-    return run_subprocess(working_dir, args)
+    return run_subprocess(working_dir, args, env)
 
 
 if __name__ == "__main__":

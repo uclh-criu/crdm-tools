@@ -9,6 +9,11 @@ on:
     paths: ["prefect/**"]
   workflow_dispatch:
 
+# Only run actions on the most recent push to a branch
+concurrency:
+  group: "${{ github.workflow }}-${{ github.head_ref }}"
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -30,5 +35,7 @@ jobs:
 
       - name: Run pytest
         working-directory: ./prefect
+        env:
+          GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         run: |
           make test
