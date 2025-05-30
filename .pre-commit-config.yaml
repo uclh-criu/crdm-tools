@@ -28,9 +28,18 @@ repos:
       - id: ruff-format
       - id: ruff
         args: [--fix]
+
   # Uncomment when https://github.com/mrtazz/checkmake/issues/87
   # is resolved
   # - repo: https://github.com/mrtazz/checkmake.git
   #   rev: 0.2.2
   #   hooks:
   #     - id: checkmake
+
+  - repo: local
+    hooks:
+      - id: copyright-headers
+        name: copyright-headers
+        language: script
+        types_or: [python, shell, yaml, dockerfile]
+        entry: .github/linters/check_headers_exist.sh
