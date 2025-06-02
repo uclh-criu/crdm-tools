@@ -82,6 +82,8 @@ def run_omop_es_docker(
         "compose",
         "--project-name",
         DEPLOYMENT_NAME,
+	"--file",
+	"docker-compose.prod.yml",
         "run",
         "--env",
         "OMOP_ES_SETTINGS_ID",
