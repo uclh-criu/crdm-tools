@@ -36,6 +36,7 @@ if [ "$OMOP_ES_BATCHED" = true ]; then
     echo "Running batched omop_es..."
     CMD="Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID"
     # Add on extra CLI arguments if they're filled
+    [ "$OMOP_ES_ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
     [ -n "$OMOP_ES_OUTPUT_DIRECTORY" ] && CMD="$CMD --output_directory $OMOP_ES_OUTPUT_DIRECTORY"
 else
     CMD="Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID"
