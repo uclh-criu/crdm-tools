@@ -104,6 +104,7 @@ RUN install2.r --error --skipinstalled \
     odbc \
     DBI \
     arrow \
+    nanoarrow \
     lubridate \
     glue \
     dbplyr \
