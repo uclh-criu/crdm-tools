@@ -85,7 +85,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     expected_env_values = {
         "SETTINGS_ID": "mock_project_settings",
         "BATCHED": "False",
-        "OUTPUT_DIR": "",
+        "OUTPUT_DIRECTORY": "",
         "ZIP_OUTPUT": "False",
     }
 
