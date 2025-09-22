@@ -1,3 +1,17 @@
+#  Copyright (c) University College London Hospitals NHS Foundation Trust
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 FROM rocker/tidyverse:4.4.2 AS base
 
 RUN apt-get update && \
@@ -16,49 +30,15 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
 
-
-RUN install2.r --error --skipinstalled \
-    --repos http://cran.rstudio.com/ \
-    DBI \
-    R.utils \
-    R6 \
-    RPostgres \
-    RSQLite \
-    arrow \
-    assertr \
-    assertthat \
-    bit64 \
-    chron \
-    cli \
-    config \
-    dbplyr \
-    devtools \
-    glue \
-    here \
-    janitor \
-    jsonvalidate \
-    log4r \
-    lubridate \
-    nanoarrow \
-    odbc \
-    processx \
-    purrr \
-    readr \
-    readxl \
-    remotes \
-    renv \
-    rjson \
-    rlang \
-    zip \
-    && rm -rf /tmp/downloaded_packages
-
 # Add docker user
 ARG DOCKER_USER_GID
-RUN groupadd --gid $DOCKER_USER_GID docker && useradd --gid $DOCKER_USER_GID docker
+RUN groupadd --gid $DOCKER_USER_GID docker && useradd --create-home --gid $DOCKER_USER_GID docker
+RUN install2.r --error --skipinstalled \
+    --repos http://cran.rstudio.com/ \
+    renv
 
 # Set ownership of /home/docker as this is where renv will store its cache
-RUN mkdir /home/docker && \
-    chown -R docker:docker /home/docker && \
+RUN chown -R docker:docker /home/docker && \
     chmod -R g+rwXs /home/docker
 
 WORKDIR /app
@@ -72,20 +52,22 @@ FROM base AS omop_es-builder
 
 ARG OMOP_ES_BRANCH=master
 ARG GITHUB_PAT
-
 RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
 # Its a bit dumb but let's use the cache if we get a network error
-RUN Rscript -e "renv::restore()" || \
-    Rscript -e "renv::restore()" || \
-    Rscript -e "renv::restore()" || \
-    Rscript -e "renv::restore()"
+RUN Rscript -e "options(Ncpus=4); renv::restore()" || \
+    Rscript -e "options(Ncpus=4); renv::restore()" || \
+    Rscript -e "options(Ncpus=4); renv::restore()" || \
+    Rscript -e "options(Ncpus=4); renv::restore()"
 
 RUN Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
+# Allow for an extra pull if the branch is updated without having to do renv restore from the start
+RUN git pull origin ${OMOP_ES_BRANCH}
+RUN Rscript -e "renv::restore()"
 
-# Final omop_es iamge
+# Final omop_es image
 FROM base AS omop_es
 
 ARG RENV_CACHE=/home/docker/.cache/R/renv
@@ -110,6 +92,36 @@ RUN git clone -b ${OMOP_CASCADE_BRANCH} \
 
 # omop-cascade
 FROM base AS omop-cascade
+
+USER root
+RUN install2.r --error --skipinstalled \
+    --repos http://cran.rstudio.com/ \
+    devtools \
+    tidyverse \
+    here \
+    config \
+    R.utils \
+    odbc \
+    DBI \
+    arrow \
+    nanoarrow \
+    lubridate \
+    glue \
+    dbplyr \
+    assertr \
+    chron \
+    RSQLite \
+    bit64 \
+    rjson \
+    log4r \
+    R6 \
+    cli \
+    janitor \
+    purrr \
+    RPostgres \
+    && rm -rf /tmp/downloaded_packages
+
+USER docker
 
 COPY --from=omop-cascade-builder --chmod=0775 /app/omop-cascade /app
 WORKDIR /app

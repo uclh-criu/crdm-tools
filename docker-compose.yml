@@ -1,6 +1,21 @@
+#  Copyright (c) University College London Hospitals NHS Foundation Trust
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+################################################################################
+
 # Common variables
-x-http-proxy: &http-proxy ${HTTP_PROXY}
-x-https-proxy: &https-proxy ${HTTPS_PROXY}
+x-http-proxy: &http-proxy ${HTTP_PROXY:-}
+x-https-proxy: &https-proxy ${HTTPS_PROXY:-}
 x-no-proxy: &no-proxy localhost,0.0.0.0,127.0.0.1,uclvlddpragae10
 
 x-proxy-common: &proxy-common
@@ -34,9 +49,9 @@ services:
       <<: *proxy-common
       SETTINGS_ID: "${SETTINGS_ID}"
       BATCHED: "${BATCHED}"
-      START_BATCH: "${START_BATCH}"
-      EXTRACT_DT: "${EXTRACT_DT}"
+      OUTPUT_DIRECTORY: "${OUTPUT_DIRECTORY}"
       ZIP_OUTPUT: "${ZIP_OUTPUT}"
+      TZ: Europe/London
     volumes:
       - "./extract:/app/extract"
 
@@ -52,5 +67,6 @@ services:
     environment:
       <<: *proxy-common
       CRDM_ID: "${CRDM_ID}"
+      TZ: Europe/London
     volumes:
       - "./omop-cascade/local:/share/local"

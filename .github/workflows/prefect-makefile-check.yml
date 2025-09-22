@@ -13,25 +13,34 @@
 #  limitations under the License.
 ################################################################################
 
-name: Lint
+name: Check the Prefect Makefile
 
 on:
+  push:
+    branches: ["main"]
+    paths: ["prefect/**"]
   pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: ["main"]
+    paths: ["prefect/**"]
+  workflow_dispatch:
 
 jobs:
-  pre-commit:
+  check:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.12"
+          version: "0.6.1"
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      - name: Run smoke check of Makefile
+        working-directory: ./prefect
+        run: |
+          make help
+          make uv-exists
+          make start-server --dry-run
+          make deploy-all --dry-run
+          make clean --dry-run

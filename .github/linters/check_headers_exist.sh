@@ -1,3 +1,4 @@
+#!/bin/bash
 #  Copyright (c) University College London Hospitals NHS Foundation Trust
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -10,28 +11,25 @@
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
-#  limitations under the License.
-################################################################################
+# limitations under the License.
 
-name: Lint
+set -o errexit
+set -o pipefail
 
-on:
-  pull_request:
+for ext in ".yml" ".yaml" ".sh" "Dockerfile" ".py"
+do
+    for path in $(find . -type f -name "*$ext")
+    do
+        if git check-ignore -q "$path" ; then  # Ignore any .gitignored files
+            continue
+        fi
+        if [[ "$path" == *".lock"* ]]; then # Ignore any lock files
+            continue
+        fi
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+        if ! grep -q "Copyright" "$path"; then
+            echo -e "\n\e[31m»»» ⚠️  No copyright/license header in $path"
+            exit 1
+        fi
+    done || exit 1
+done

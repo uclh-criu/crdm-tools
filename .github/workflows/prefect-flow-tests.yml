@@ -13,16 +13,15 @@
 #  limitations under the License.
 ################################################################################
 
-
-name: Build Docker Images
+name: Run tests of Prefect flow and task code
 
 on:
   push:
     branches: ["main"]
-    paths: ["docker-compose.yml", "docker/Dockerfile"]
+    paths: ["prefect/**"]
   pull_request:
     branches: ["main"]
-    paths: ["docker-compose.yml", "docker/Dockerfile"]
+    paths: ["prefect/**"]
   workflow_dispatch:
 
 # Only run actions on the most recent push to a branch
@@ -31,20 +30,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [omop_es, omop-cascade]
-
     steps:
-      - uses: actions/checkout@v4
-      - name: Build the Docker image
-        env:
-          GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.1"
+
+      - name: Use template environment files
         run: |
           cp template.env .env
           cp omop_es/template.env omop_es/.env
           cp omop-cascade/template.env omop-cascade/.env
-          docker compose build ${{ matrix.image }} --build-arg GITHUB_PAT=${GITHUB_PAT}
+          cp prefect/template.env prefect/.env
+
+      - name: Run pytest
+        working-directory: ./prefect
+        env:
+          GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
+        run: |
+          make test
