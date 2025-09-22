@@ -13,11 +13,10 @@
 #  limitations under the License.
 ################################################################################
 
-import os
 import datetime
+import os
 import subprocess
 from pathlib import Path
-from typing import List, Optional
 
 from prefect import flow, runtime, task
 
@@ -41,27 +40,27 @@ def dry_run_if(condition: bool):
 
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
-    build_args: List[str] = [],
-    batched: bool = False,
+    build_args: list[str] = [],
     settings_id: str = "mock_project_settings",
-    zip_output: Optional[bool] = False,
-    start_batch: Optional[str] = None,
-    extract_dt: Optional[str] = None,
+    batched: bool = False,
+    output_dir: str | None = "",
+    zip_output: bool | None = False,
 ) -> None:
     build_docker(ROOT_PATH, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
-        batched=batched,
         settings_id=settings_id,
+        batched=batched,
+        output_dir=output_dir,
         zip_output=zip_output,
-        start_batch=start_batch,
-        extract_dt=extract_dt,
     )
 
 
 @task(retries=10, retry_delay_seconds=10)
 def build_docker(
-    working_dir: Path, build_args: Optional[List[str]] = None, dry_run: bool = False
+    working_dir: Path,
+    build_args: list[str] | None = None,
+    dry_run: bool = False,
 ) -> None:
     build_args = build_args or []
     args = [
@@ -80,17 +79,15 @@ def build_docker(
 @task(retries=5, retry_delay_seconds=1800)
 def run_omop_es_docker(
     working_dir: Path,
-    batched: bool,
     settings_id: str,
-    zip_output: Optional[bool],
-    start_batch: Optional[str],
-    extract_dt: Optional[str],
+    batched: bool,
+    output_dir: str | None,
+    zip_output: bool | None,
 ) -> subprocess.CompletedProcess:
     env = os.environ.copy()
-    env["BATCHED"] = str(batched)
     env["SETTINGS_ID"] = settings_id
-    env["START_BATCH"] = start_batch if start_batch else ""
-    env["EXTRACT_DT"] = extract_dt if extract_dt else ""
+    env["BATCHED"] = str(batched)
+    env["OUTPUT_DIR"] = str(output_dir) if output_dir is not None else ""
     env["ZIP_OUTPUT"] = str(zip_output) if zip_output is not None else ""
     args = [
         "docker",
@@ -103,11 +100,9 @@ def run_omop_es_docker(
         "--env",
         "BATCHED",
         "--env",
+        "OUTPUT_DIR",
+        "--env",
         "ZIP_OUTPUT",
-        "--env",
-        "START_BATCH",
-        "--env",
-        "EXTRACT_DT",
         "--rm",
         "omop_es",
     ]

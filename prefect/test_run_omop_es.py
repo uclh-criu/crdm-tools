@@ -17,8 +17,8 @@ import pytest
 from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
-import run_subprocess
 import run_omop_es
+import run_subprocess
 
 
 @freeze_time("2025-01-01")
@@ -77,20 +77,18 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            batched=False,
             settings_id="mock_project_settings",
+            batched=False,
+            output_dir="",
             zip_output=False,
-            start_batch=None,
-            extract_dt=None,
         )
 
     # String values of the arguments we passed into the function 👆
     expected_env_values = {
-        "OMOP_ES_SETTINGS_ID": "mock_project_settings",
-        "OMOP_ES_BATCHED": "False",
-        "OMOP_ES_ZIP_OUTPUT": "False",
-        "OMOP_ES_START_BATCH": "",
-        "OMOP_ES_EXTRACT_DT": "",
+        "SETTINGS_ID": "mock_project_settings",
+        "BATCHED": "False",
+        "OUTPUT_DIR": "",
+        "ZIP_OUTPUT": "False",
     }
 
     for var, expected_value in expected_env_values.items():
