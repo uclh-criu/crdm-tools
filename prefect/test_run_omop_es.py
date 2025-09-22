@@ -13,7 +13,6 @@
 #  limitations under the License.
 ################################################################################
 
-import pytest
 from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
@@ -43,7 +42,6 @@ def test_star_dry_run_if():
 # > RuntimeError raised from a missing flow context.
 
 
-@pytest.mark.slow
 def test_build_docker():
     with disable_run_logger():
         run_omop_es.build_docker.fn(
