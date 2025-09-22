@@ -19,10 +19,10 @@ name: Build Docker Images
 on:
   push:
     branches: ["main"]
-    paths: ["docker-compose.yml", "docker/Dockerfile"]
+    paths: ["docker/Dockerfile"]
   pull_request:
     branches: ["main"]
-    paths: ["docker-compose.yml", "docker/Dockerfile"]
+    paths: ["docker/Dockerfile"]
   workflow_dispatch:
 
 # Only run actions on the most recent push to a branch
