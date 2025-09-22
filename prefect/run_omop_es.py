@@ -87,7 +87,7 @@ def run_omop_es_docker(
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
     env["BATCHED"] = str(batched)
-    env["OUTPUT_DIR"] = str(output_dir) if output_dir is not None else ""
+    env["OUTPUT_DIRECTORY"] = str(output_dir) if output_dir is not None else ""
     env["ZIP_OUTPUT"] = str(zip_output) if zip_output is not None else ""
     args = [
         "docker",
@@ -100,7 +100,7 @@ def run_omop_es_docker(
         "--env",
         "BATCHED",
         "--env",
-        "OUTPUT_DIR",
+        "OUTPUT_DIRECTORY",
         "--env",
         "ZIP_OUTPUT",
         "--rm",
