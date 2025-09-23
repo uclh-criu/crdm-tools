@@ -78,6 +78,9 @@ COPY --chmod=0755 ./omop_es.sh .
 
 CMD ["/app/omop_es.sh"]
 
+
+# =====================================================================================================================
+
 # omop-cascade
 # omop-cascade-builder
 # using multi-stage build so the GitHub PAT is not present in the final image

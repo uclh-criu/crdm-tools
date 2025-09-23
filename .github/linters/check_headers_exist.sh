@@ -16,20 +16,20 @@
 set -o errexit
 set -o pipefail
 
-for ext in ".yml" ".yaml" ".sh" "Dockerfile" ".py"
-do
-    for path in $(find . -type f -name "*$ext")
-    do
-        if git check-ignore -q "$path" ; then  # Ignore any .gitignored files
-            continue
-        fi
-        if [[ "$path" == *".lock"* ]]; then # Ignore any lock files
-            continue
-        fi
+paths="$@"
 
-        if ! grep -q "Copyright" "$path"; then
-            echo -e "\n\e[31m»»» ⚠️  No copyright/license header in $path"
-            exit 1
-        fi
-    done || exit 1
-done
+for path in $paths
+do
+    echo "Checking $path"
+    if git check-ignore -q "$path" ; then  # Ignore any .gitignored files
+        continue
+    fi
+    if [[ "$path" == *".lock"* ]]; then # Ignore any lock files
+        continue
+    fi
+
+    if ! grep -q "Copyright" "$path"; then
+        echo -e "\n\033[1;31m ⚠️  No copyright/license header in $path\033[0m\n"
+        exit 1
+    fi
+done || exit 1

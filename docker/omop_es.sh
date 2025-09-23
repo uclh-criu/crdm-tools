@@ -31,17 +31,17 @@ cd $OMOP_ES_DIR
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
 
-echo "Running omop_es for ${OMOP_ES_SETTINGS_ID}..."
-if [ "$OMOP_ES_BATCHED" = true ]; then
-    echo "Running batched omop_es..."
-    CMD="Rscript $MAIN_BATCHED --settings_id $OMOP_ES_SETTINGS_ID"
-    # Add on extra CLI arguments if they're filled
-    [ "$OMOP_ES_ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
-    [ -n "$OMOP_ES_OUTPUT_DIRECTORY" ] && CMD="$CMD --output_directory $OMOP_ES_OUTPUT_DIRECTORY"
+echo "Running omop_es for ${SETTINGS_ID}..."
+if [ "$BATCHED" = true ]; then
+	echo "Running batched omop_es..."
+	CMD="Rscript $MAIN_BATCHED --settings_id $SETTINGS_ID"
+	# Add on extra CLI arguments if they're filled
+	[ "$ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
+	[ -n "$OUTPUT_DIRECTORY" ] && CMD="$CMD --output_directory $OUTPUT_DIRECTORY"
 else
-    CMD="Rscript $MAIN_COMMAND --settings_id $OMOP_ES_SETTINGS_ID"
-    ## Add on extra CLI arguments if they're filled
-    [ "$OMOP_ES_ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
+	CMD="Rscript $MAIN_COMMAND --settings_id $SETTINGS_ID"
+	## Add on extra CLI arguments if they're filled
+	[ "$ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
 fi
 
 $CMD

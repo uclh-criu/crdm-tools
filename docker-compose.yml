@@ -47,10 +47,10 @@ services:
     platform: linux/amd64
     environment:
       <<: *proxy-common
-      OMOP_ES_SETTINGS_ID: "${SETTINGS_ID}"
-      OMOP_ES_BATCHED: "${BATCHED}"
-      OMOP_ES_OUTPUT_DIRECTORY: "${OUTPUT_DIRECTORY}"
-      OMOP_ES_ZIP_OUTPUT: "${ZIP_OUTPUT}"
+      SETTINGS_ID: "${SETTINGS_ID}"
+      BATCHED: "${BATCHED}"
+      OUTPUT_DIRECTORY: "${OUTPUT_DIRECTORY}"
+      ZIP_OUTPUT: "${ZIP_OUTPUT}"
       TZ: Europe/London
     volumes:
       - "./extract:/app/extract"
