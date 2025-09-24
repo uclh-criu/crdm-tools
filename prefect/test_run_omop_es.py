@@ -35,6 +35,20 @@ def test_star_dry_run_if():
     assert command_without == ["docker", "compose", "do-thing"]
 
 
+def test_star_use_prod_if():
+    # Test that *dry_run_if expands as we expect
+    command_with = ["docker", "compose", *run_omop_es.use_prod_if(True), "do-thing"]
+    command_without = ["docker", "compose", *run_omop_es.use_prod_if(False), "do-thing"]
+    assert command_with == [
+        "docker",
+        "compose",
+        "-f",
+        "docker-compose.prod.yml",
+        "do-thing",
+    ]
+    assert command_without == ["docker", "compose", "do-thing"]
+
+
 # See https://docs.prefect.io/v3/develop/test-workflows#unit-testing-tasks for
 # how to test tasks (or sub functions) outside of a flow context.
 #

@@ -38,6 +38,13 @@ def dry_run_if(condition: bool):
         yield "--dry-run"
 
 
+def use_prod_if(condition: bool):
+    """Optionally yield the prod flag for docker compose commands."""
+    if condition:
+        yield "-f"
+        yield "docker-compose.prod.yml"
+
+
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
     build_args: list[str] = [],
@@ -63,9 +70,11 @@ def build_docker(
     dry_run: bool = False,
 ) -> None:
     build_args = build_args or []
+    is_prod = os.environ.get("ENV", "dev") == "prod"
     args = [
         "docker",
         "compose",
+        *use_prod_if(is_prod),
         *dry_run_if(dry_run),
         "--project-name",
         DEPLOYMENT_NAME,
