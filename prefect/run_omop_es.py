@@ -24,6 +24,7 @@ from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
 DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
+IS_PROD = os.environ.get("ENVIRONMENT", "dev") == "prod"
 
 
 def name_with_timestamp() -> str:
@@ -47,11 +48,11 @@ def use_prod_if(condition: bool):
 
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
+    settings_id: str,
     omop_es_branch: str = "master",
-    settings_id: str = "mock_project_settings",
     batched: bool = False,
-    output_directory: str | None = "",
-    zip_output: bool | None = False,
+    output_directory: str = "",
+    zip_output: bool = False,
 ) -> None:
     build_args = ["--build-arg", f"OMOP_ES_BRANCH={omop_es_branch}"]
     build_docker(ROOT_PATH, build_args=build_args)
@@ -67,15 +68,14 @@ def run_omop_es(
 @task(retries=10, retry_delay_seconds=10)
 def build_docker(
     working_dir: Path,
-    build_args: list[str] | None = None,
+    build_args: list[str],
     dry_run: bool = False,
 ) -> None:
     build_args = build_args or []
-    is_prod = os.environ.get("ENV", "dev") == "prod"
     args = [
         "docker",
         "compose",
-        *use_prod_if(is_prod),
+        *use_prod_if(IS_PROD),
         *dry_run_if(dry_run),
         "--project-name",
         DEPLOYMENT_NAME,
@@ -91,8 +91,8 @@ def run_omop_es_docker(
     working_dir: Path,
     settings_id: str,
     batched: bool,
-    output_directory: str | None,
-    zip_output: bool | None,
+    output_directory: str,
+    zip_output: bool,
 ) -> subprocess.CompletedProcess:
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
@@ -104,6 +104,7 @@ def run_omop_es_docker(
     args = [
         "docker",
         "compose",
+        *use_prod_if(IS_PROD),
         "--project-name",
         DEPLOYMENT_NAME,
         "run",

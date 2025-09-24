@@ -40,12 +40,10 @@ deployments:
     tags: [dev]
     description:
     entrypoint: run_omop_es.py:run_omop_es
+    schedules: null
     parameters:
       omop_es_branch: master
-      batched: false
       settings_id: mock_project_settings
-      zip_output: false
-    concurrency_limit: 1 # only run 1 instance of the same project at a time
     work_pool:
       name: omop_es-worker
       work_queue_name: default
@@ -57,12 +55,7 @@ deployments:
     tags: [prod]
     description:
     entrypoint: run_omop_es.py:run_omop_es
-    parameters:  # Defaults, expected to be overridden when creating runs
-      omop_es_branch: master
-      batched: false
-      settings_id: mock_project_settings
-      zip_output: false
-    concurrency_limit: 1 # only run 1 instance of the same project at a time
+    schedules: null
     work_pool:
       name: omop_es-worker
       work_queue_name: default
