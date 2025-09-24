@@ -18,7 +18,7 @@ help: ## Show this help
 	@echo
 
 stop:    ## Stop all Prefect services and take the server down
-	$(MAKE) stop-pool
+	$(MAKE) stop-worker
 	$(MAKE) stop-server
 
 clean:   ## Stop Prefect services, take the server down, and reset the database
@@ -27,12 +27,10 @@ clean:   ## Stop Prefect services, take the server down, and reset the database
 	rm -rf /tmp/runner_storage
 
 deploy-all: start-pool ## Deploy all Prefect flows and start a worker
-	$(UVRUN) prefect deploy --all
-	$(MAKE) start-worker
+	$(UVRUN) prefect --no-prompt deploy --all
 
 deploy: start-pool ## Deploy a single Prefect flow (interactive selection) and start a worker
 	$(UVRUN) prefect deploy
-	$(MAKE) start-worker
 
 start-worker: start-pool ## Start a Prefect worker of type 'process'
 	$(UVRUN) prefect worker start --pool '${WORK_POOL_NAME}'
@@ -46,7 +44,7 @@ start-server: uv-exists ## Start the Prefect server in the background
 stop-server: uv-exists ## Stop the Prefect server
 	$(UVRUN) prefect server stop
 
-stop-pool: uv-exists ## Stop the Prefect worker pool
+delete-pool: uv-exists ## Delete the Prefect worker pool
 	-$(UVRUN) prefect work-pool delete '${WORK_POOL_NAME}' # allow failure in case pool does not exist
 
 reset-prefect-database: uv-exists ## Reset the Prefect database
