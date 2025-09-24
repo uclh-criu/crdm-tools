@@ -56,7 +56,7 @@ deployments:
     tags: [prod]
     description:
     entrypoint: run_omop_es.py:run_omop_es
-    parameters:
+    parameters:  # Defaults, expected to be overridden when creating runs
       omop_es_branch: master
       batched: false
       settings_id: mock_project_settings
