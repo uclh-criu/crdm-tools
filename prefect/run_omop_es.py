@@ -47,18 +47,19 @@ def use_prod_if(condition: bool):
 
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
-    build_args: list[str] = [],
+    omop_es_branch: str = "master",
     settings_id: str = "mock_project_settings",
     batched: bool = False,
-    output_dir: str | None = "",
+    output_directory: str | None = "",
     zip_output: bool | None = False,
 ) -> None:
+    build_args = ["--build-arg", f"OMOP_ES_BRANCH={omop_es_branch}"]
     build_docker(ROOT_PATH, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
         batched=batched,
-        output_dir=output_dir,
+        output_directory=output_directory,
         zip_output=zip_output,
     )
 
@@ -90,13 +91,15 @@ def run_omop_es_docker(
     working_dir: Path,
     settings_id: str,
     batched: bool,
-    output_dir: str | None,
+    output_directory: str | None,
     zip_output: bool | None,
 ) -> subprocess.CompletedProcess:
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
     env["BATCHED"] = str(batched)
-    env["OUTPUT_DIRECTORY"] = str(output_dir) if output_dir is not None else ""
+    env["OUTPUT_DIRECTORY"] = (
+        str(output_directory) if output_directory is not None else ""
+    )
     env["ZIP_OUTPUT"] = str(zip_output) if zip_output is not None else ""
     args = [
         "docker",
