@@ -35,23 +35,34 @@ pull:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-  - name: omop_es-mock
+  - name: omop_es-dev
     version:
-    tags: []
+    tags: [dev]
     description:
-    schedules:
-      - cron: "0 0 */1 * *" # At 00:00 every day
-        timezone:
-        day_or: true
-        active: true
     entrypoint: run_omop_es.py:run_omop_es
     parameters:
-      build_args: [--build-arg, "OMOP_ES_BRANCH=master"]
+      omop_es_branch: master
       batched: false
       settings_id: mock_project_settings
       zip_output: false
     concurrency_limit: 1 # only run 1 instance of the same project at a time
     work_pool:
-      name: omop_es-mock-worker
+      name: omop_es-worker
       work_queue_name: default
-      job_variables: {}
+      job_variables: {"ENV": "dev"}
+
+  - name: omop_es-prod
+    version:
+    tags: [prod]
+    description:
+    entrypoint: run_omop_es.py:run_omop_es
+    parameters:
+      omop_es_branch: master
+      batched: false
+      settings_id: mock_project_settings
+      zip_output: false
+    concurrency_limit: 1 # only run 1 instance of the same project at a time
+    work_pool:
+      name: omop_es-worker
+      work_queue_name: default
+      job_variables: {"ENV": "prod"}
