@@ -57,7 +57,8 @@ RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/om
 
 WORKDIR /app/omop_es
 # Its a bit dumb but let's use the cache if we get a network error
-RUN Rscript -e "options(Ncpus=4); renv::restore()" || \
+RUN Rscript -e "renv::hydrate()" && \
+    Rscript -e "options(Ncpus=4); renv::restore()" || \
     Rscript -e "options(Ncpus=4); renv::restore()" || \
     Rscript -e "options(Ncpus=4); renv::restore()" || \
     Rscript -e "options(Ncpus=4); renv::restore()"
