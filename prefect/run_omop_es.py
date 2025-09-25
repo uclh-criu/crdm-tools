@@ -106,7 +106,7 @@ def run_omop_es_docker(
         "compose",
         *use_prod_if(IS_PROD),
         "--project-name",
-        DEPLOYMENT_NAME,
+        f"{settings_id}",
         "run",
         "--env",
         "SETTINGS_ID",
