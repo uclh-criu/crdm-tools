@@ -17,12 +17,9 @@ help: ## Show this help
         | column -t -s '|'
 	@echo
 
-stop:    ## Stop all Prefect services and take the server down
-	$(MAKE) stop-worker
+clean:   ## Stop all Prefect services, take the server down, and reset the database
+	$(MAKE) delete-pool
 	$(MAKE) stop-server
-
-clean:   ## Stop Prefect services, take the server down, and reset the database
-	$(MAKE) stop
 	$(MAKE) reset-prefect-database
 	rm -rf /tmp/runner_storage
 
