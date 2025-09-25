@@ -91,7 +91,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
             working_dir=run_omop_es.ROOT_PATH,
             settings_id="mock_project_settings",
             batched=False,
-            output_dir="",
+            output_directory="",
             zip_output=False,
         )
 
