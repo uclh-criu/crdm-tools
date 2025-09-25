@@ -23,7 +23,7 @@ clean:   ## Stop all Prefect services, take the server down, and reset the datab
 	$(MAKE) reset-prefect-database
 	rm -rf /tmp/runner_storage
 
-deploy-all: start-pool ## Deploy all Prefect flows and start a worker
+deploy-all:  ## Deploy all Prefect flows
 	$(UVRUN) prefect --no-prompt deploy --all
 
 deploy: start-pool ## Deploy a single Prefect flow (interactive selection) and start a worker
