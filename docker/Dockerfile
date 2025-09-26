@@ -116,6 +116,7 @@ RUN git clone -b ${OMOP_CASCADE_BRANCH} \
 # omop-cascade
 FROM base AS omop-cascade
 
+USER root
 RUN install2.r --error --skipinstalled \
     --repos http://cran.rstudio.com/ \
     devtools \
