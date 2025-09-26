@@ -77,14 +77,6 @@ RUN for i in 1 2 3 4; do \
     (echo "renv::restore() failed, attempt $i/4" && sleep 5); \
     done
 
-RUN Rscript omop_metadata/download_omop_metadata.R && \
-    Rscript source_access/UCLH/mock_database/recreate_mockdb.R
-
-# Pull the requested branch and update any changed packages
-ARG OMOP_ES_BRANCH=master
-RUN git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
-RUN Rscript -e "options(Ncpus=4); renv::restore()"
-
 # Final omop_es image
 FROM base AS omop_es
 

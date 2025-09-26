@@ -36,12 +36,23 @@ MAIN_COMMAND="./main/command.R"
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
 
+# Pull requested omop_es branch and install dependencies
+echo "Installing dependencies..."
+git restore .
+git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
+# Disable pak as this invalidates where we expect the cache to be
+Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()"
+
+if [ "$ENVIRONMENT" = dev ]; then
+	echo "Recreating mock database..."
+	Rscript source_access/UCLH/mock_database/recreate_mockdb.R
+fi
+
 echo Running omop_es from commit: $(git rev-parse --short HEAD)
 
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
-
 echo "Running omop_es for ${SETTINGS_ID}..."
 if [ $BATCHED = true ]; then
 	echo "Running batched omop_es..."
