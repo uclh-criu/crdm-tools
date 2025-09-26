@@ -17,6 +17,10 @@ FROM rocker/tidyverse:4.4.2 AS base
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
     curl \
+    # dependency for arrow R pkg
+    cmake \
+    # dependency for V8 R pkg
+    libnode-dev \
     gnupg \
     libudunits2-dev \
     libgdal-dev && \
