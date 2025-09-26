@@ -14,6 +14,16 @@
 
 FROM rocker/tidyverse:4.4.3 AS base
 
+ARG DOCKER_USER_GID=1000
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+
+# Set proxy environment if provided
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTPS_PROXY}
+ENV NO_PROXY=${NO_PROXY}
+
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
     curl \
@@ -35,28 +45,31 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
 
 # Add docker user
-ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --create-home --gid $DOCKER_USER_GID docker
 
 # Set ownership of /home/docker as this is where renv will store its cache
 RUN chown -R docker:docker /home/docker && \
     chmod -R g+rwXs /home/docker
 
-WORKDIR /app
 RUN chown -R docker:docker /app && \
     chmod -R g+rwXs /app
+
 USER docker
+WORKDIR /app
 
 # omop_es-builder
 # using multi-stage build so the GitHub PAT is not present in the final image
 FROM base AS omop_es-builder
 
+ARG GITHUB_PAT
+RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
+
 # Initial pull, always clone from default branch for initial renv restore
 # This step is cached
-ARG GITHUB_PAT
 RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
+
 # Its a bit dumb but let's use the cache if we get a network error
 RUN for i in 1 2 3 4; do \
     Rscript -e "options(Ncpus=4); renv::restore()" && break || \
