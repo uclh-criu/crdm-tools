@@ -40,6 +40,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "0.6.1"
+          enable-cache: true
 
       - name: Use template environment files
         run: |
