@@ -97,10 +97,8 @@ def run_omop_es_docker(
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
     env["BATCHED"] = str(batched)
-    env["OUTPUT_DIRECTORY"] = (
-        str(output_directory) if output_directory is not None else ""
-    )
-    env["ZIP_OUTPUT"] = str(zip_output) if zip_output is not None else ""
+    env["OUTPUT_DIRECTORY"] = str(output_directory)
+    env["ZIP_OUTPUT"] = str(zip_output)
     args = [
         "docker",
         "compose",
