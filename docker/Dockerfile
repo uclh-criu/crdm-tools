@@ -58,10 +58,10 @@ RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
 # Its a bit dumb but let's use the cache if we get a network error
-RUN Rscript -e "options(Ncpus=4); renv::restore()" || \
-    Rscript -e "options(Ncpus=4); renv::restore()" || \
-    Rscript -e "options(Ncpus=4); renv::restore()" || \
-    Rscript -e "options(Ncpus=4); renv::restore()"
+RUN for i in 1 2 3 4; do \
+    Rscript -e "options(Ncpus=4); renv::restore()" && break || \
+    (echo "renv::restore() failed, attempt $i/4" && sleep 5); \
+    done
 
 RUN Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
