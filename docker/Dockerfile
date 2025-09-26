@@ -84,7 +84,7 @@ RUN Rscript omop_metadata/download_omop_metadata.R && \
 ARG OMOP_ES_BRANCH=master
 # Disable caching so we always pull the latest ref
 ARG CACHE_BUST
-RUN git checkout ${OMOP_ES_BRANCH}
+RUN git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
 RUN Rscript -e "options(Ncpus=4); renv::restore()"
 
 # Final omop_es image
