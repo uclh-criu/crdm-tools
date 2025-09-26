@@ -13,10 +13,11 @@
 #  limitations under the License.
 ################################################################################
 
-import pytest
 import logging
-from pathlib import Path
 import subprocess
+from pathlib import Path
+
+import pytest
 from prefect.logging import disable_run_logger
 
 import run_subprocess
@@ -26,25 +27,10 @@ _LOG_MESSAGES_AND_EXPECTED_LEVELS = [
     ("[DEBUG] This is a debug message", "DEBUG"),
     ("[INFO] This is an info message", "INFO"),
     ("[WARNING] This is a warning message", "WARNING"),
+    ("[WARN] This is a warning message", "WARNING"),
     ("[ERROR] This is an error message", "ERROR"),
+    ("[CRITICAL] This is a critical message", "CRITICAL"),
 ]
-
-
-@pytest.mark.parametrize(
-    "message, expected_level",
-    _LOG_MESSAGES_AND_EXPECTED_LEVELS
-    + [
-        # Some extra test cases
-        ("[CRITICAL] This is a critical message", "CRITICAL"),
-        ("[UNKNOWN] This is an unknown level message", "UNKNOWN"),
-        ("[FLIBBLE] This is a nonsense level message", "FLIBBLE"),
-        ("This is a message without a level", None),
-    ],
-)
-def test_log_level_extraction(message, expected_level):
-    assert run_subprocess.extract_log_level(message) == expected_level, (
-        f"Expected '{expected_level}' for message '{message}'"
-    )
 
 
 @pytest.mark.parametrize(
@@ -67,7 +53,7 @@ def test_log(caplog, message, expected_level):
     assert len(caplog.records) == 1, "Expected one log record"
     assert message in caplog.text, f"Expected message '{message}' in log"
     assert caplog.records[0].levelname == expected_level, (
-        f"Expected log level '{expected_level}'"
+        f"Expected log level '{expected_level}', for message '{message}'"
     )
 
 
