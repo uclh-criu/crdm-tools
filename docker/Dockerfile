@@ -51,7 +51,8 @@ RUN groupadd --gid $DOCKER_USER_GID docker && useradd --create-home --gid $DOCKE
 RUN chown -R docker:docker /home/docker && \
     chmod -R g+rwXs /home/docker
 
-RUN chown -R docker:docker /app && \
+RUN mkdir /app && \
+    chown -R docker:docker /app && \
     chmod -R g+rwXs /app
 
 USER docker
