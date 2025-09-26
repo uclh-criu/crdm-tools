@@ -35,8 +35,8 @@ start-worker: start-pool ## Start a Prefect worker of type 'process'
 start-pool: uv-exists ## Start a Prefect worker pool
 	-$(UVRUN) prefect work-pool create '${WORK_POOL_NAME}' --type process --overwrite
 
-start-server: uv-exists ## Start the Prefect server in the background
-	-$(UVRUN) prefect server start --background # allow failure in case server already running
+start-server: uv-exists ## Start the Prefect server
+	-$(UVRUN) prefect server start  # allow failure in case server already running
 
 stop-server: uv-exists ## Stop the Prefect server
 	$(UVRUN) prefect server stop
