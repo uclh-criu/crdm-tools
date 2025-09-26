@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM rocker/tidyverse:4.4.2 AS base
+FROM rocker/tidyverse:4.4.3 AS base
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
