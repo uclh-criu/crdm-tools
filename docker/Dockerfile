@@ -86,6 +86,8 @@ COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app
 COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 ${RENV_CACHE} ${RENV_CACHE}
 COPY --chmod=0755 ./omop_es.sh .
 
+ENV RENV_PATHS_CACHE=${RENV_PATHS_CACHE_CONTAINER}
+
 CMD ["/app/omop_es.sh"]
 
 
