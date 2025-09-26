@@ -73,7 +73,8 @@ WORKDIR /app/omop_es
 
 # Its a bit dumb but let's use the cache if we get a network error
 RUN for i in 1 2 3 4; do \
-    Rscript -e "options(Ncpus=4); renv::restore()" && break || \
+    # Disable pak as this invalidates where we expect the cache to be
+    Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()" && break || \
     (echo "renv::restore() failed, attempt $i/4" && sleep 5); \
     done
 
