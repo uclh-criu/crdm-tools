@@ -120,7 +120,3 @@ def run_omop_es_docker(
         "omop_es",
     ]
     return run_subprocess(working_dir, args, env)
-
-
-if __name__ == "__main__":
-    run_omop_es()
