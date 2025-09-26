@@ -37,9 +37,6 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
 # Add docker user
 ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --create-home --gid $DOCKER_USER_GID docker
-RUN install2.r --error --skipinstalled \
-    --repos http://cran.rstudio.com/ \
-    renv
 
 # Set ownership of /home/docker as this is where renv will store its cache
 RUN chown -R docker:docker /home/docker && \
