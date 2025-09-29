@@ -24,6 +24,7 @@ from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
 DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
+IS_PROD = os.environ.get("ENVIRONMENT", "dev") == "prod"
 
 
 def name_with_timestamp() -> str:
@@ -38,20 +39,28 @@ def dry_run_if(condition: bool):
         yield "--dry-run"
 
 
+def use_prod_if(condition: bool):
+    """Optionally yield the prod flag for docker compose commands."""
+    if condition:
+        yield "-f"
+        yield "docker-compose.prod.yml"
+
+
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
-    build_args: list[str] = [],
-    settings_id: str = "mock_project_settings",
+    settings_id: str,
+    omop_es_branch: str = "master",
     batched: bool = False,
-    output_dir: str | None = "",
-    zip_output: bool | None = False,
+    output_directory: str = "",
+    zip_output: bool = False,
 ) -> None:
-    build_docker(ROOT_PATH, build_args=build_args)
+    build_args = ["--build-arg", f"OMOP_ES_BRANCH={omop_es_branch}"]
+    build_docker(ROOT_PATH, project_name=settings_id, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
         batched=batched,
-        output_dir=output_dir,
+        output_directory=output_directory,
         zip_output=zip_output,
     )
 
@@ -59,16 +68,18 @@ def run_omop_es(
 @task(retries=10, retry_delay_seconds=10)
 def build_docker(
     working_dir: Path,
-    build_args: list[str] | None = None,
+    project_name: str,
+    build_args: list[str] = [],
     dry_run: bool = False,
 ) -> None:
     build_args = build_args or []
     args = [
         "docker",
         "compose",
+        *use_prod_if(IS_PROD),
         *dry_run_if(dry_run),
         "--project-name",
-        DEPLOYMENT_NAME,
+        project_name,
         "build",
         "omop_es",
     ]
@@ -81,19 +92,20 @@ def run_omop_es_docker(
     working_dir: Path,
     settings_id: str,
     batched: bool,
-    output_dir: str | None,
-    zip_output: bool | None,
+    output_directory: str,
+    zip_output: bool,
 ) -> subprocess.CompletedProcess:
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
     env["BATCHED"] = str(batched)
-    env["OUTPUT_DIRECTORY"] = str(output_dir) if output_dir is not None else ""
-    env["ZIP_OUTPUT"] = str(zip_output) if zip_output is not None else ""
+    env["OUTPUT_DIRECTORY"] = str(output_directory)
+    env["ZIP_OUTPUT"] = str(zip_output)
     args = [
         "docker",
         "compose",
+        *use_prod_if(IS_PROD),
         "--project-name",
-        DEPLOYMENT_NAME,
+        f"{settings_id}",
         "run",
         "--env",
         "SETTINGS_ID",
@@ -103,11 +115,9 @@ def run_omop_es_docker(
         "OUTPUT_DIRECTORY",
         "--env",
         "ZIP_OUTPUT",
+        "--env",
+        "DEBUG",  # passed through from global env
         "--rm",
         "omop_es",
     ]
     return run_subprocess(working_dir, args, env)
-
-
-if __name__ == "__main__":
-    run_omop_es()

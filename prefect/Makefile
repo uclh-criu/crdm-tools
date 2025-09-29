@@ -8,7 +8,7 @@ define assert_command_exists
 endef
 
 UVRUN := uv run --env-file .env
-POOL_NAME := omop_es-mock-worker
+WORK_POOL_NAME := omop_es-worker
 
 help: ## Show this help
 	@echo
@@ -17,37 +17,32 @@ help: ## Show this help
         | column -t -s '|'
 	@echo
 
-stop:    ## Stop all Prefect services and take the server down
-	$(MAKE) stop-pool
+clean:   ## Stop all Prefect services, take the server down, and reset the database
+	$(MAKE) delete-pool
 	$(MAKE) stop-server
-
-clean:   ## Stop Prefect services, take the server down, and reset the database
-	$(MAKE) stop
 	$(MAKE) reset-prefect-database
 	rm -rf /tmp/runner_storage
 
-deploy-all: start-pool ## Deploy all Prefect flows and start a worker
-	$(UVRUN) prefect deploy --all
-	$(MAKE) start-worker
+deploy-all:  ## Deploy all Prefect flows
+	$(UVRUN) prefect --no-prompt deploy --all
 
 deploy: start-pool ## Deploy a single Prefect flow (interactive selection) and start a worker
 	$(UVRUN) prefect deploy
-	$(MAKE) start-worker
 
 start-worker: start-pool ## Start a Prefect worker of type 'process'
-	$(UVRUN) prefect worker start --pool '${POOL_NAME}'
+	$(UVRUN) prefect worker start --pool '${WORK_POOL_NAME}'
 
 start-pool: uv-exists ## Start a Prefect worker pool
-	-$(UVRUN) prefect work-pool create '${POOL_NAME}' --type process --overwrite
+	-$(UVRUN) prefect work-pool create '${WORK_POOL_NAME}' --type process --overwrite
 
-start-server: uv-exists ## Start the Prefect server in the background
-	-$(UVRUN) prefect server start --background # allow failure in case server already running
+start-server: uv-exists ## Start the Prefect server
+	-$(UVRUN) prefect server start  # allow failure in case server already running
 
 stop-server: uv-exists ## Stop the Prefect server
 	$(UVRUN) prefect server stop
 
-stop-pool: uv-exists ## Stop the Prefect worker pool
-	-$(UVRUN) prefect work-pool delete '${POOL_NAME}' # allow failure in case pool does not exist
+delete-pool: uv-exists ## Delete the Prefect worker pool
+	-$(UVRUN) prefect work-pool delete '${WORK_POOL_NAME}' # allow failure in case pool does not exist
 
 reset-prefect-database: uv-exists ## Reset the Prefect database
 	$(UVRUN) prefect server database reset -y

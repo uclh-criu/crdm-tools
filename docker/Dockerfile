@@ -12,11 +12,25 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM rocker/tidyverse:4.4.2 AS base
+FROM rocker/tidyverse:4.4.3 AS base
+
+ARG DOCKER_USER_GID=1000
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+
+# Set proxy environment if provided
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTPS_PROXY}
+ENV NO_PROXY=${NO_PROXY}
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
     curl \
+    # dependency for arrow R pkg
+    cmake \
+    # dependency for V8 R pkg
+    libnode-dev \
     gnupg \
     libudunits2-dev \
     libgdal-dev && \
@@ -31,41 +45,45 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
 
 # Add docker user
-ARG DOCKER_USER_GID
 RUN groupadd --gid $DOCKER_USER_GID docker && useradd --create-home --gid $DOCKER_USER_GID docker
-RUN install2.r --error --skipinstalled \
-    --repos http://cran.rstudio.com/ \
-    renv
 
 # Set ownership of /home/docker as this is where renv will store its cache
 RUN chown -R docker:docker /home/docker && \
     chmod -R g+rwXs /home/docker
 
-WORKDIR /app
-RUN chown -R docker:docker /app && \
+RUN mkdir /app && \
+    chown -R docker:docker /app && \
     chmod -R g+rwXs /app
+
 USER docker
+WORKDIR /app
 
 # omop_es-builder
 # using multi-stage build so the GitHub PAT is not present in the final image
 FROM base AS omop_es-builder
 
-ARG OMOP_ES_BRANCH=master
 ARG GITHUB_PAT
-RUN git clone -b ${OMOP_ES_BRANCH} https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
+RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
+
+# Initial pull, always clone from default branch for initial renv restore
+# This step is cached
+RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
+
 # Its a bit dumb but let's use the cache if we get a network error
-RUN Rscript -e "options(Ncpus=4); renv::restore()" || \
-    Rscript -e "options(Ncpus=4); renv::restore()" || \
-    Rscript -e "options(Ncpus=4); renv::restore()" || \
-    Rscript -e "options(Ncpus=4); renv::restore()"
+RUN for i in 1 2 3 4; do \
+    Rscript -e "options(Ncpus=4); renv::restore()" && break || \
+    (echo "renv::restore() failed, attempt $i/4" && sleep 5); \
+    done
 
 RUN Rscript omop_metadata/download_omop_metadata.R && \
     Rscript source_access/UCLH/mock_database/recreate_mockdb.R
-# Allow for an extra pull if the branch is updated without having to do renv restore from the start
-RUN git pull origin ${OMOP_ES_BRANCH}
-RUN Rscript -e "renv::restore()"
+
+# Pull the requested branch and update any changed packages
+ARG OMOP_ES_BRANCH=master
+RUN git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
+RUN Rscript -e "options(Ncpus=4); renv::restore()"
 
 # Final omop_es image
 FROM base AS omop_es
@@ -96,6 +114,7 @@ RUN git clone -b ${OMOP_CASCADE_BRANCH} \
 # omop-cascade
 FROM base AS omop-cascade
 
+# Need root access to install R packages to the system library
 USER root
 RUN install2.r --error --skipinstalled \
     --repos http://cran.rstudio.com/ \

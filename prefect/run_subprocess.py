@@ -61,10 +61,12 @@ def log(line: bytes, logger: Logger | LoggingAdapter) -> None:
             logger.debug(stripped_line)
         case "INFO":
             logger.info(stripped_line)
-        case "WARNING":
+        case "WARNING" | "WARN":
             logger.warning(stripped_line)
         case "ERROR":
             logger.error(stripped_line)
+        case "CRITICAL":
+            logger.critical(stripped_line)
         case _:
             logger.info(stripped_line)
 

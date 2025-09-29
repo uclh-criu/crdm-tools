@@ -13,6 +13,8 @@
 #  limitations under the License.
 ################################################################################
 
+import os
+
 from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
@@ -35,6 +37,20 @@ def test_star_dry_run_if():
     assert command_without == ["docker", "compose", "do-thing"]
 
 
+def test_star_use_prod_if():
+    # Test that *dry_run_if expands as we expect
+    command_with = ["docker", "compose", *run_omop_es.use_prod_if(True), "do-thing"]
+    command_without = ["docker", "compose", *run_omop_es.use_prod_if(False), "do-thing"]
+    assert command_with == [
+        "docker",
+        "compose",
+        "-f",
+        "docker-compose.prod.yml",
+        "do-thing",
+    ]
+    assert command_without == ["docker", "compose", "do-thing"]
+
+
 # See https://docs.prefect.io/v3/develop/test-workflows#unit-testing-tasks for
 # how to test tasks (or sub functions) outside of a flow context.
 #
@@ -46,6 +62,7 @@ def test_build_docker():
     with disable_run_logger():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
+            project_name="my-project",
             dry_run=True,
         )
 
@@ -77,7 +94,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
             working_dir=run_omop_es.ROOT_PATH,
             settings_id="mock_project_settings",
             batched=False,
-            output_dir="",
+            output_directory="",
             zip_output=False,
         )
 
@@ -93,3 +110,22 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         assert f"{var}={expected_value}" in result.stdout, (
             f"Environment variable {var} not set correctly: {result.stdout}"
         )
+
+
+def test_run_omop_es_docker_can_run_batched():
+    os.environ["DEBUG"] = "true"
+    with disable_run_logger():
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id="mock_project_settings",
+            batched=True,
+            output_directory="foo",
+            zip_output=True,
+        )
+
+    expected_command = "Rscript ./main/batched.R --settings_id mock_project_settings --output_directory foo --zip_output"
+
+    ## Check that expected_command is the last line of result.stdout
+    assert expected_command == result.stdout.strip().split("\n")[-1], (
+        f"Expected command '{expected_command}',\ngot '{result.stdout}'"
+    )
