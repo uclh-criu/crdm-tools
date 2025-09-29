@@ -16,9 +16,18 @@
 
 set -euxo pipefail
 
+# Helper function to convert to lowercase
+tolower() {
+	echo "$1" | tr '[:upper:]' '[:lower:]'
+}
+
 # Define all variables
 # Git variables are coming from the '.env' file
 OMOP_ES_DIR="omop_es"
+
+DEBUG=$(tolower ${DEBUG:-false})
+BATCHED=$(tolower ${BATCHED:-false})
+ZIP_OUTPUT=$(tolower ${ZIP_OUTPUT:-false})
 
 # The following variables are relative to the OMOP_ES directory
 MAIN_BATCHED="./main/batched.R"
@@ -34,16 +43,21 @@ echo Running omop_es from commit: $(git rev-parse --short HEAD)
 # and sent to the container in the 'docker-compose.yml' file
 
 echo "Running omop_es for ${SETTINGS_ID}..."
-if [ "$BATCHED" = true ]; then
+if [ $BATCHED = true ]; then
 	echo "Running batched omop_es..."
 	CMD="Rscript $MAIN_BATCHED --settings_id $SETTINGS_ID"
 	# Add on extra CLI arguments if they're filled
-	[ "$ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
 	[ -n "$OUTPUT_DIRECTORY" ] && CMD="$CMD --output_directory $OUTPUT_DIRECTORY"
 else
 	CMD="Rscript $MAIN_COMMAND --settings_id $SETTINGS_ID"
-	## Add on extra CLI arguments if they're filled
-	[ "$ZIP_OUTPUT" = true ] && CMD="$CMD --zip_output"
 fi
 
-$CMD
+## Add on extra CLI arguments if they're filled
+[ $ZIP_OUTPUT = true ] && CMD="$CMD --zip_output"
+
+# If in debug mode, only print the command
+if [ "$DEBUG" = true ]; then
+	echo "$CMD"
+else
+	$CMD
+fi

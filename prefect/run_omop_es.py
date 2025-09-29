@@ -114,6 +114,8 @@ def run_omop_es_docker(
         "OUTPUT_DIRECTORY",
         "--env",
         "ZIP_OUTPUT",
+        "--env",
+        "DEBUG",  # passed through from global env
         "--rm",
         "omop_es",
     ]

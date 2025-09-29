@@ -13,6 +13,8 @@
 #  limitations under the License.
 ################################################################################
 
+import os
+
 from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
@@ -107,3 +109,22 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         assert f"{var}={expected_value}" in result.stdout, (
             f"Environment variable {var} not set correctly: {result.stdout}"
         )
+
+
+def test_run_omop_es_docker_can_run_batched():
+    os.environ["DEBUG"] = "true"
+    with disable_run_logger():
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id="mock_project_settings",
+            batched=True,
+            output_directory="foo",
+            zip_output=True,
+        )
+
+    expected_command = "Rscript ./main/batched.R --settings_id mock_project_settings --output_directory foo --zip_output"
+
+    ## Check that expected_command is the last line of result.stdout
+    assert expected_command == result.stdout.strip().split("\n")[-1], (
+        f"Expected command '{expected_command}',\ngot '{result.stdout}'"
+    )
