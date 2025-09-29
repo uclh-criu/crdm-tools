@@ -114,6 +114,7 @@ RUN git clone -b ${OMOP_CASCADE_BRANCH} \
 # omop-cascade
 FROM base AS omop-cascade
 
+# Need root access to install R packages to the system library
 USER root
 RUN install2.r --error --skipinstalled \
     --repos http://cran.rstudio.com/ \
