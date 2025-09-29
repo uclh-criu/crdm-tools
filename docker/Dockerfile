@@ -82,8 +82,6 @@ RUN Rscript omop_metadata/download_omop_metadata.R && \
 
 # Pull the requested branch and update any changed packages
 ARG OMOP_ES_BRANCH=master
-# Disable caching so we always pull the latest ref
-ARG CACHE_BUST
 RUN git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
 RUN Rscript -e "options(Ncpus=4); renv::restore()"
 
