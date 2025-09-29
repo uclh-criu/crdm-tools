@@ -44,7 +44,6 @@ services:
       args:
         <<: [*build-args-common, *github-pat]
         OMOP_ES_BRANCH: ${OMOP_ES_BRANCH:-master}
-        CACHE_BUST: ${CACHE_BUST:-$(date +%s)}
     platform: linux/amd64
     environment:
       <<: *proxy-common
