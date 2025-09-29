@@ -62,6 +62,7 @@ def test_build_docker():
     with disable_run_logger():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
+            project_name="my-project",
             dry_run=True,
         )
 

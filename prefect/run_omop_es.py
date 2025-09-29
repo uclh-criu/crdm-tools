@@ -55,7 +55,7 @@ def run_omop_es(
     zip_output: bool = False,
 ) -> None:
     build_args = ["--build-arg", f"OMOP_ES_BRANCH={omop_es_branch}"]
-    build_docker(ROOT_PATH, build_args=build_args)
+    build_docker(ROOT_PATH, project_name=settings_id, build_args=build_args)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
@@ -68,6 +68,7 @@ def run_omop_es(
 @task(retries=10, retry_delay_seconds=10)
 def build_docker(
     working_dir: Path,
+    project_name: str,
     build_args: list[str] = [],
     dry_run: bool = False,
 ) -> None:
@@ -78,7 +79,7 @@ def build_docker(
         *use_prod_if(IS_PROD),
         *dry_run_if(dry_run),
         "--project-name",
-        DEPLOYMENT_NAME,
+        project_name,
         "build",
         "omop_es",
     ]
