@@ -38,12 +38,11 @@ cd $OMOP_ES_DIR
 
 # Pull requested omop_es branch and install dependencies
 echo "Installing dependencies..."
-git restore .
 git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
 # Disable pak as this invalidates where we expect the cache to be
 Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()"
 
-if [ "$ENVIRONMENT" = dev ]; then
+if [ "$ENVIRONMENT" = dev ] && [ "$DEBUG" = false ]; then
 	echo "Recreating mock database..."
 	Rscript source_access/UCLH/mock_database/recreate_mockdb.R
 fi

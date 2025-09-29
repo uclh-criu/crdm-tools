@@ -58,6 +58,10 @@ RUN mkdir /app && \
 USER docker
 WORKDIR /app
 
+
+# =====================================================================================================================
+
+
 # omop_es-builder
 # using multi-stage build so the GitHub PAT is not present in the final image
 FROM base AS omop_es-builder
@@ -69,22 +73,18 @@ RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
 # This step is cached
 RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
-WORKDIR /app/omop_es
-
-# Its a bit dumb but let's use the cache if we get a network error
-RUN for i in 1 2 3 4; do \
-    # Disable pak as this invalidates where we expect the cache to be
-    Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()" && break || \
-    (echo "renv::restore() failed, attempt $i/4" && sleep 5); \
-    done
-
 # Final omop_es image
 FROM base AS omop_es
 
-ARG RENV_CACHE=${RENV_PATHS_CACHE}
-
 COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app/omop_es
-COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 ${RENV_CACHE} ${RENV_CACHE}
+
+# Restore git files after manual copy
+RUN cd /app/omop_es && git restore .
+
+# Bootsrap renv
+ENV RENV_PATHS_CACHE=${RENV_PATHS_CACHE}
+RUN cd /app/omop_es && Rscript -e "renv::hydrate()"
+
 COPY --chmod=0755 ./omop_es.sh .
 
 CMD ["/app/omop_es.sh"]

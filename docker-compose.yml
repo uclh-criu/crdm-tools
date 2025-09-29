@@ -43,6 +43,7 @@ services:
       target: omop_es
       args:
         <<: [*build-args-common, *github-pat]
+        RENV_PATHS_CACHE: ${RENV_PATHS_CACHE_CONTAINER}
     platform: linux/amd64
     environment:
       <<: *proxy-common
