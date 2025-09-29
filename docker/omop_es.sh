@@ -27,6 +27,8 @@ MAIN_COMMAND="./main/command.R"
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
 
+echo Running omop_es from commit: $(git rev-parse --short HEAD)
+
 # Run the batched process if specified otherwise run the simple process
 # All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
 # and sent to the container in the 'docker-compose.yml' file
