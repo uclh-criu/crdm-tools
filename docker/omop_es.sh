@@ -36,6 +36,21 @@ MAIN_COMMAND="./main/command.R"
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
 
+# Fetch latest refs from remote to ensure we can checkout any branch/tag/commit
+git fetch --all --tags --quiet
+
+# Determine if OMOP_ES_BRANCH is a commit SHA, tag, or branch
+if git rev-parse --verify "${OMOP_ES_BRANCH}^{commit}" >/dev/null 2>&1; then
+	echo "Checking out pinned version: ${OMOP_ES_BRANCH}"
+	git checkout "${OMOP_ES_BRANCH}"
+	echo "Running omop_es from pinned commit: $(git rev-parse --short HEAD)"
+else
+	echo "Checking out latest from branch: ${OMOP_ES_BRANCH}"
+	git checkout "${OMOP_ES_BRANCH}"
+	git pull origin "${OMOP_ES_BRANCH}"
+	echo "Running omop_es from commit: $(git rev-parse --short HEAD)"
+fi
+
 # Run the batched process if specified, otherwise run the simple process
 # Variables are passed through from the environment
 if [ $BATCHED = "true" ]; then
@@ -57,11 +72,8 @@ if [ "$DEBUG" = "true" ]; then
 fi
 
 echo "Installing dependencies..."
-git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
 # Disable pak as this invalidates where we expect the cache to be
 Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()"
-
-echo Running omop_es from commit: $(git rev-parse --short HEAD)
 
 if [ "$ENVIRONMENT" = "dev" ]; then
 	echo "Recreating mock database..."
