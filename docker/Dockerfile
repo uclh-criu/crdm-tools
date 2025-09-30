@@ -82,6 +82,7 @@ COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app
 RUN cd /app/omop_es && git restore .
 
 # Bootsrap renv
+ARG RENV_PATHS_CACHE
 ENV RENV_PATHS_CACHE=${RENV_PATHS_CACHE}
 RUN cd /app/omop_es && Rscript -e "renv::hydrate()"
 
