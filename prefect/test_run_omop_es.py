@@ -93,6 +93,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id="mock_project_settings",
+            omop_es_branch="master",
             batched=False,
             output_directory="",
             zip_output=False,
@@ -118,6 +119,7 @@ def test_run_omop_es_docker_can_run_batched():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id="mock_project_settings",
+            omop_es_branch="master",
             batched=True,
             output_directory="foo",
             zip_output=True,
@@ -128,4 +130,47 @@ def test_run_omop_es_docker_can_run_batched():
     ## Check that expected_command is the last line of result.stdout
     assert expected_command == result.stdout.strip().split("\n")[-1], (
         f"Expected command '{expected_command}',\ngot '{result.stdout}'"
+    )
+
+
+def test_version_pinning_with_branch_pulls_latest():
+    """Test that using a branch name results in git pull being called."""
+    os.environ["DEBUG"] = "true"
+
+    with disable_run_logger():
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id="mock_project_settings",
+            omop_es_branch="master",
+            batched=False,
+            output_directory="",
+            zip_output=False,
+        )
+
+    # Shell output goes to stderr due to set -x in bash script
+    output = result.stdout.strip().split("\n")
+    assert "Checking out latest from branch: master" in output, (
+        f"Expected branch checkout message in stdout output: {output}"
+    )
+
+
+def test_version_pinning_with_commit_sha():
+    """Test that using a commit SHA results in pinned checkout (no git pull)."""
+    os.environ["DEBUG"] = "true"
+
+    test_sha = "f439272"
+
+    with disable_run_logger():
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id="mock_project_settings",
+            omop_es_branch=test_sha,
+            batched=False,
+            output_directory="",
+            zip_output=False,
+        )
+
+    output = result.stdout.strip().split("\n")
+    assert f"Checking out pinned version: {test_sha}" in output, (
+        f"Expected version checkout message in stdout output: {output}"
     )
