@@ -38,11 +38,11 @@ deployments:
   - name: omop_es-dev
     version:
     tags: [dev]
-    description:
+    description: Development deployment - always pulls latest from master branch
     entrypoint: run_omop_es.py:run_omop_es
     schedules: null
     parameters:
-      omop_es_branch: master
+      omop_es_branch: master  # Branch name - will always pull latest
       settings_id: mock_project_settings
     work_pool:
       name: omop_es-worker
@@ -54,9 +54,15 @@ deployments:
   - name: omop_es-prod
     version:
     tags: [prod]
-    description:
+    description: Production deployment - configure omop_es_branch parameter when deploying
     entrypoint: run_omop_es.py:run_omop_es
     schedules: null
+    parameters:
+      # omop_es_branch can be:
+      # - Branch name (e.g., "master") - always pulls latest
+      # - Commit SHA (e.g., "a1b2c3d4") - pins to specific commit
+      # - Tag name (e.g., "v1.0.0") - pins to release
+      omop_es_branch: master
     work_pool:
       name: omop_es-worker
       work_queue_name: default

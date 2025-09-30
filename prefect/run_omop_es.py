@@ -54,11 +54,21 @@ def run_omop_es(
     output_directory: str = "",
     zip_output: bool = False,
 ) -> None:
-    build_args = ["--build-arg", f"OMOP_ES_BRANCH={omop_es_branch}"]
-    build_docker(ROOT_PATH, project_name=settings_id, build_args=build_args)
+    """Run omop_es data extraction workflow.
+
+    Args:
+        settings_id: Project settings identifier
+        omop_es_branch: Git ref to use - can be a branch name (pulls latest),
+                       commit SHA (pins to specific version), or tag name (pins to release)
+        batched: Whether to run in batched mode
+        output_directory: Custom output directory path
+        zip_output: Whether to compress output
+    """
+    build_docker(ROOT_PATH, project_name=settings_id)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
+        omop_es_branch=omop_es_branch,
         batched=batched,
         output_directory=output_directory,
         zip_output=zip_output,
@@ -83,7 +93,6 @@ def build_docker(
         "build",
         "omop_es",
     ]
-    args += build_args
     run_subprocess(working_dir, args)
 
 
@@ -91,12 +100,14 @@ def build_docker(
 def run_omop_es_docker(
     working_dir: Path,
     settings_id: str,
+    omop_es_branch: str,
     batched: bool,
     output_directory: str,
     zip_output: bool,
 ) -> subprocess.CompletedProcess:
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
+    env["OMOP_ES_BRANCH"] = omop_es_branch
     env["BATCHED"] = str(batched)
     env["OUTPUT_DIRECTORY"] = str(output_directory)
     env["ZIP_OUTPUT"] = str(zip_output)
@@ -109,6 +120,8 @@ def run_omop_es_docker(
         "run",
         "--env",
         "SETTINGS_ID",
+        "--env",
+        "OMOP_ES_BRANCH",
         "--env",
         "BATCHED",
         "--env",
