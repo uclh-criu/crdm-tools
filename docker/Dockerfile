@@ -55,8 +55,16 @@ RUN mkdir /app && \
     chown -R docker:docker /app && \
     chmod -R g+rwXs /app
 
+RUN mkdir /renv && \
+    chown -R docker:docker /renv && \
+    chmod -R g+rwXs /renv
+
 USER docker
 WORKDIR /app
+
+
+# =====================================================================================================================
+
 
 # omop_es-builder
 # using multi-stage build so the GitHub PAT is not present in the final image
@@ -69,29 +77,19 @@ RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
 # This step is cached
 RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
-WORKDIR /app/omop_es
-
-# Its a bit dumb but let's use the cache if we get a network error
-RUN for i in 1 2 3 4; do \
-    Rscript -e "options(Ncpus=4); renv::restore()" && break || \
-    (echo "renv::restore() failed, attempt $i/4" && sleep 5); \
-    done
-
-RUN Rscript omop_metadata/download_omop_metadata.R && \
-    Rscript source_access/UCLH/mock_database/recreate_mockdb.R
-
-# Pull the requested branch and update any changed packages
-ARG OMOP_ES_BRANCH=master
-RUN git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
-RUN Rscript -e "options(Ncpus=4); renv::restore()"
-
 # Final omop_es image
 FROM base AS omop_es
 
-ARG RENV_CACHE=/home/docker/.cache/R/renv
-
 COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app/omop_es
-COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 ${RENV_CACHE} ${RENV_CACHE}
+
+# Restore git files after manual copy
+RUN cd /app/omop_es && git restore .
+
+# Bootstrap renv
+RUN cd /app/omop_es && \
+    Rscript -e "renv::hydrate()" && \
+    Rscript -e "renv::clean()"
+
 COPY --chmod=0755 ./omop_es.sh .
 
 CMD ["/app/omop_es.sh"]

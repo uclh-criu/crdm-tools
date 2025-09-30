@@ -43,10 +43,12 @@ services:
       target: omop_es
       args:
         <<: [*build-args-common, *github-pat]
-        OMOP_ES_BRANCH: ${OMOP_ES_BRANCH:-master}
     platform: linux/amd64
     environment:
       <<: *proxy-common
+      ENVIRONMENT: ${ENVIRONMENT:-dev}
+      OMOP_ES_BRANCH: ${OMOP_ES_BRANCH:-master}
+      RENV_PATHS_CACHE: ${RENV_PATHS_CACHE_CONTAINER}
       SETTINGS_ID: "${SETTINGS_ID}"
       BATCHED: "${BATCHED}"
       OUTPUT_DIRECTORY: "${OUTPUT_DIRECTORY}"
@@ -54,6 +56,7 @@ services:
       TZ: Europe/London
     volumes:
       - "./extract:/app/extract"
+      - "${RENV_PATHS_CACHE_HOST}:${RENV_PATHS_CACHE_CONTAINER}"
 
   omop-cascade:
     env_file: "./omop-cascade/.env"

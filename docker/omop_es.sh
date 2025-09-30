@@ -36,14 +36,9 @@ MAIN_COMMAND="./main/command.R"
 # Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
 
-echo Running omop_es from commit: $(git rev-parse --short HEAD)
-
-# Run the batched process if specified otherwise run the simple process
-# All the variables prefixed with OMOP_ES are coming from the 'docker compose up' command line,
-# and sent to the container in the 'docker-compose.yml' file
-
-echo "Running omop_es for ${SETTINGS_ID}..."
-if [ $BATCHED = true ]; then
+# Run the batched process if specified, otherwise run the simple process
+# Variables are passed through from the environment
+if [ $BATCHED = "true" ]; then
 	echo "Running batched omop_es..."
 	CMD="Rscript $MAIN_BATCHED --settings_id $SETTINGS_ID"
 	# Add on extra CLI arguments if they're filled
@@ -53,11 +48,26 @@ else
 fi
 
 ## Add on extra CLI arguments if they're filled
-[ $ZIP_OUTPUT = true ] && CMD="$CMD --zip_output"
+[ $ZIP_OUTPUT = "true" ] && CMD="$CMD --zip_output"
 
 # If in debug mode, only print the command
-if [ "$DEBUG" = true ]; then
+if [ "$DEBUG" = "true" ]; then
 	echo "$CMD"
-else
-	$CMD
+	exit 0
 fi
+
+echo "Installing dependencies..."
+git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
+# Disable pak as this invalidates where we expect the cache to be
+Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()"
+
+echo Running omop_es from commit: $(git rev-parse --short HEAD)
+
+if [ "$ENVIRONMENT" = "dev" ]; then
+	echo "Recreating mock database..."
+	Rscript source_access/UCLH/mock_database/recreate_mockdb.R
+fi
+
+echo "Running omop_es for ${SETTINGS_ID}..."
+
+$CMD

@@ -48,7 +48,8 @@ deployments:
       name: omop_es-worker
       work_queue_name: default
       job_variables:
-        ENV: dev
+        env:
+          ENVIRONMENT: dev
 
   - name: omop_es-prod
     version:
