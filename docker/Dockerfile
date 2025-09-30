@@ -55,6 +55,10 @@ RUN mkdir /app && \
     chown -R docker:docker /app && \
     chmod -R g+rwXs /app
 
+RUN mkdir /renv && \
+    chown -R docker:docker /renv && \
+    chmod -R g+rwXs /renv
+
 USER docker
 WORKDIR /app
 
@@ -81,8 +85,10 @@ COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app
 # Restore git files after manual copy
 RUN cd /app/omop_es && git restore .
 
-# Bootsrap renv
-RUN cd /app/omop_es && Rscript -e "renv::hydrate()"
+# Bootstrap renv
+RUN cd /app/omop_es && \
+    Rscript -e "renv::hydrate()" && \
+    Rscript -e "renv::clean()"
 
 COPY --chmod=0755 ./omop_es.sh .
 
