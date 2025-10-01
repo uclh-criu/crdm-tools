@@ -40,15 +40,17 @@ cd $OMOP_ES_DIR
 git fetch --all --tags --quiet
 
 # Determine if OMOP_ES_BRANCH is a commit SHA, tag, or branch
-if git rev-parse --verify "${OMOP_ES_BRANCH}^{commit}" >/dev/null 2>&1; then
-	echo "Checking out pinned version: ${OMOP_ES_BRANCH}"
-	git checkout "${OMOP_ES_BRANCH}"
-	echo "Running omop_es from pinned commit: $(git rev-parse --short HEAD)"
-else
+# Check if it's a branch by querying the remote
+if git ls-remote --heads origin "${OMOP_ES_BRANCH}" | grep -q .; then
 	echo "Checking out latest from branch: ${OMOP_ES_BRANCH}"
 	git checkout "${OMOP_ES_BRANCH}"
 	git pull origin "${OMOP_ES_BRANCH}"
 	echo "Running omop_es from commit: $(git rev-parse --short HEAD)"
+else
+	# It's either a commit SHA or a tag - treat as pinned version
+	echo "Checking out pinned version: ${OMOP_ES_BRANCH}"
+	git checkout "${OMOP_ES_BRANCH}"
+	echo "Running omop_es from pinned commit: $(git rev-parse --short HEAD)"
 fi
 
 # Run the batched process if specified, otherwise run the simple process
