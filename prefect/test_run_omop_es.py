@@ -92,7 +92,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="mock_project_settings",
+            settings_id="test",
             omop_es_branch="master",
             batched=False,
             output_directory="",
@@ -101,7 +101,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
 
     # String values of the arguments we passed into the function 👆
     expected_env_values = {
-        "SETTINGS_ID": "mock_project_settings",
+        "SETTINGS_ID": "test",
         "BATCHED": "False",
         "OUTPUT_DIRECTORY": "",
         "ZIP_OUTPUT": "False",
@@ -118,14 +118,14 @@ def test_run_omop_es_docker_can_run_batched():
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="mock_project_settings",
+            settings_id="test",
             omop_es_branch="master",
             batched=True,
             output_directory="foo",
             zip_output=True,
         )
 
-    expected_command = "Rscript ./main/batched.R --settings_id mock_project_settings --output_directory foo --zip_output"
+    expected_command = "Rscript ./main/batched.R --settings_id test --output_directory foo --zip_output"
 
     ## Check that expected_command is the last line of result.stdout
     assert expected_command == result.stdout.strip().split("\n")[-1], (
@@ -140,7 +140,7 @@ def test_version_pinning_with_branch_pulls_latest():
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="mock_project_settings",
+            settings_id="test",
             omop_es_branch="master",
             batched=False,
             output_directory="",
@@ -163,7 +163,7 @@ def test_version_pinning_with_commit_sha():
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="mock_project_settings",
+            settings_id="test",
             omop_es_branch=test_sha,
             batched=False,
             output_directory="",
@@ -173,4 +173,26 @@ def test_version_pinning_with_commit_sha():
     output = result.stdout.strip().split("\n")
     assert f"Checking out pinned version: {test_sha}" in output, (
         f"Expected version checkout message in stdout output: {output}"
+    )
+
+
+def test_version_pinning_fails_with_invalid_sha():
+    """Test that using an invalid commit SHA results in an error."""
+    os.environ["DEBUG"] = "true"
+
+    test_sha = "invalid_sha"
+
+    # with pytest.raises():
+    with disable_run_logger():
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id="test",
+            omop_es_branch=test_sha,
+            batched=False,
+            output_directory="",
+            zip_output=False,
+        )
+
+    assert "Invalid commit SHA" in result.stderr, (
+        f"Expected error message in stderr output: {result.stderr}"
     )
