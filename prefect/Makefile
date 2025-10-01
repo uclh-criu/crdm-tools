@@ -23,10 +23,10 @@ clean:   ## Stop all Prefect services, take the server down, and reset the datab
 	$(MAKE) reset-prefect-database
 	rm -rf /tmp/runner_storage
 
-deploy-all:  ## Deploy all Prefect flows
+deploy-all: uv-exists ## Deploy all Prefect flows
 	$(UVRUN) prefect --no-prompt deploy --all
 
-deploy: start-pool ## Deploy a single Prefect flow (interactive selection) and start a worker
+deploy: uv-exists ## Deploy a single Prefect flow (interactive selection) and start a worker
 	$(UVRUN) prefect deploy
 
 start-worker: start-pool ## Start a Prefect worker of type 'process'
@@ -48,7 +48,7 @@ reset-prefect-database: uv-exists ## Reset the Prefect database
 	$(UVRUN) prefect server database reset -y
 
 test: uv-exists ## Run tests of our Prefect functionality
-	$(UVRUN) pytest . --log-cli-level=INFO -s
+	$(UVRUN) pytest . -s
 
 uv-exists: ## Check if uv is available
 	$(call assert_command_exists, uv, "Please install uv: https://docs.astral.sh/uv/getting-started/installation/")
