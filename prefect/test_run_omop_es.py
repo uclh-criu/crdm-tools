@@ -107,7 +107,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id=PROJECT_NAME,
-            omop_es_branch="master",
+            omop_es_version="master",
             batched=False,
             output_directory="",
             zip_output=False,
@@ -133,7 +133,7 @@ def test_run_omop_es_docker_can_run_batched():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id=PROJECT_NAME,
-            omop_es_branch="master",
+            omop_es_version="master",
             batched=True,
             output_directory="foo",
             zip_output=True,
@@ -155,7 +155,7 @@ def test_version_pinning_with_branch_pulls_latest():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id=PROJECT_NAME,
-            omop_es_branch="master",
+            omop_es_version="master",
             batched=False,
             output_directory="",
             zip_output=False,
@@ -178,7 +178,7 @@ def test_version_pinning_with_commit_sha():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id=PROJECT_NAME,
-            omop_es_branch=test_sha,
+            omop_es_version=test_sha,
             batched=False,
             output_directory="",
             zip_output=False,
@@ -201,7 +201,7 @@ def test_version_pinning_fails_with_invalid_sha():
             run_omop_es.run_omop_es_docker.fn(
                 working_dir=run_omop_es.ROOT_PATH,
                 settings_id=PROJECT_NAME,
-                omop_es_branch=test_sha,
+                omop_es_version=test_sha,
                 batched=False,
                 output_directory="",
                 zip_output=False,

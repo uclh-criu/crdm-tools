@@ -47,7 +47,7 @@ services:
     environment:
       <<: *proxy-common
       ENVIRONMENT: ${ENVIRONMENT:-dev}
-      OMOP_ES_BRANCH: ${OMOP_ES_BRANCH:-master}
+      OMOP_ES_VERSION: ${OMOP_ES_VERSION:-master}
       RENV_PATHS_CACHE: ${RENV_PATHS_CACHE_CONTAINER}
       SETTINGS_ID: "${SETTINGS_ID}"
       BATCHED: "${BATCHED}"

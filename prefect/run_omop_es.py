@@ -49,7 +49,7 @@ def use_prod_if(condition: bool):
 @flow(flow_run_name=name_with_timestamp, log_prints=True)
 def run_omop_es(
     settings_id: str,
-    omop_es_branch: str = "master",
+    omop_es_version: str = "master",
     batched: bool = False,
     output_directory: str = "",
     zip_output: bool = False,
@@ -58,7 +58,7 @@ def run_omop_es(
 
     Args:
         settings_id: Project settings identifier
-        omop_es_branch: Git ref to use - can be a branch name (pulls latest),
+        omop_es_version: Git ref to use - can be a branch name (pulls latest),
                        commit SHA (pins to specific version), or tag name (pins to release)
         batched: Whether to run in batched mode
         output_directory: Custom output directory path
@@ -68,7 +68,7 @@ def run_omop_es(
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
-        omop_es_branch=omop_es_branch,
+        omop_es_version=omop_es_version,
         batched=batched,
         output_directory=output_directory,
         zip_output=zip_output,
@@ -100,14 +100,14 @@ def build_docker(
 def run_omop_es_docker(
     working_dir: Path,
     settings_id: str,
-    omop_es_branch: str,
+    omop_es_version: str,
     batched: bool,
     output_directory: str,
     zip_output: bool,
 ) -> subprocess.CompletedProcess:
     env = os.environ.copy()
     env["SETTINGS_ID"] = settings_id
-    env["OMOP_ES_BRANCH"] = omop_es_branch
+    env["OMOP_ES_VERSION"] = omop_es_version
     env["BATCHED"] = str(batched)
     env["OUTPUT_DIRECTORY"] = str(output_directory)
     env["ZIP_OUTPUT"] = str(zip_output)
@@ -121,7 +121,7 @@ def run_omop_es_docker(
         "--env",
         "SETTINGS_ID",
         "--env",
-        "OMOP_ES_BRANCH",
+        "OMOP_ES_VERSION",
         "--env",
         "BATCHED",
         "--env",

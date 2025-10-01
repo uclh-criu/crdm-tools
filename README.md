@@ -27,7 +27,7 @@ docker compose build omop-cascade
 
 ## Version Pinning
 
-The `OMOP_ES_BRANCH` environment variable controls which version of `omop_es` to use. It accepts:
+The `OMOP_ES_VERSION` environment variable controls which version of `omop_es` to use. It accepts:
 
 - **Branch name** (e.g., `master`, `feature/xyz`) - Always pulls the latest commit from that branch
 - **Commit SHA** (e.g., `a1b2c3d4` or full SHA) - Pins to a specific commit (no automatic updates)

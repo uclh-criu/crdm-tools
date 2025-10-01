@@ -39,17 +39,17 @@ cd $OMOP_ES_DIR
 # Fetch latest refs from remote to ensure we can checkout any branch/tag/commit
 git fetch --all --tags --quiet
 
-# Determine if OMOP_ES_BRANCH is a commit SHA, tag, or branch
+# Determine if OMOP_ES_VERSION is a commit SHA, tag, or branch
 # Check if it's a branch by querying the remote
-if git ls-remote --heads origin "${OMOP_ES_BRANCH}" | grep -q .; then
-	echo "Checking out latest from branch: ${OMOP_ES_BRANCH}"
-	git checkout "${OMOP_ES_BRANCH}"
-	git pull origin "${OMOP_ES_BRANCH}"
+if git ls-remote --heads origin "${OMOP_ES_VERSION}" | grep -q .; then
+	echo "Checking out latest from branch: ${OMOP_ES_VERSION}"
+	git checkout "${OMOP_ES_VERSION}"
+	git pull origin "${OMOP_ES_VERSION}"
 	echo "Running omop_es from commit: $(git rev-parse --short HEAD)"
 else
 	# It's either a commit SHA or a tag - treat as pinned version
-	echo "Checking out pinned version: ${OMOP_ES_BRANCH}"
-	git checkout "${OMOP_ES_BRANCH}"
+	echo "Checking out pinned version: ${OMOP_ES_VERSION}"
+	git checkout "${OMOP_ES_VERSION}"
 	echo "Running omop_es from pinned commit: $(git rev-parse --short HEAD)"
 fi
 
