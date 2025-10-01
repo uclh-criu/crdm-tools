@@ -14,7 +14,9 @@
 ################################################################################
 
 import os
+import subprocess
 
+import pytest
 from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
@@ -182,17 +184,13 @@ def test_version_pinning_fails_with_invalid_sha():
 
     test_sha = "invalid_sha"
 
-    # with pytest.raises():
-    with disable_run_logger():
-        result = run_omop_es.run_omop_es_docker.fn(
-            working_dir=run_omop_es.ROOT_PATH,
-            settings_id="test",
-            omop_es_branch=test_sha,
-            batched=False,
-            output_directory="",
-            zip_output=False,
-        )
-
-    assert "Invalid commit SHA" in result.stderr, (
-        f"Expected error message in stderr output: {result.stderr}"
-    )
+    with pytest.raises(subprocess.CalledProcessError):
+        with disable_run_logger():
+            run_omop_es.run_omop_es_docker.fn(
+                working_dir=run_omop_es.ROOT_PATH,
+                settings_id="test",
+                omop_es_branch=test_sha,
+                batched=False,
+                output_directory="",
+                zip_output=False,
+            )
