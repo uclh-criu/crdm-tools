@@ -23,6 +23,18 @@ from prefect.logging import disable_run_logger
 import run_omop_es
 import run_subprocess
 
+PROJECT_NAME = "test_project"
+
+
+@pytest.fixture(autouse=True)
+def rebuild_test_docker():
+    """Rebuild the test docker image, to make sure it's up to date"""
+    with disable_run_logger():
+        run_omop_es.build_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            project_name=PROJECT_NAME,
+        )
+
 
 @freeze_time("2025-01-01")
 def test_name_with_timestamp():
@@ -94,7 +106,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="test",
+            settings_id=PROJECT_NAME,
             omop_es_branch="master",
             batched=False,
             output_directory="",
@@ -103,7 +115,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
 
     # String values of the arguments we passed into the function 👆
     expected_env_values = {
-        "SETTINGS_ID": "test",
+        "SETTINGS_ID": PROJECT_NAME,
         "BATCHED": "False",
         "OUTPUT_DIRECTORY": "",
         "ZIP_OUTPUT": "False",
@@ -120,14 +132,14 @@ def test_run_omop_es_docker_can_run_batched():
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="test",
+            settings_id=PROJECT_NAME,
             omop_es_branch="master",
             batched=True,
             output_directory="foo",
             zip_output=True,
         )
 
-    expected_command = "Rscript ./main/batched.R --settings_id test --output_directory foo --zip_output"
+    expected_command = f"Rscript ./main/batched.R --settings_id {PROJECT_NAME} --output_directory foo --zip_output"
 
     ## Check that expected_command is the last line of result.stdout
     assert expected_command == result.stdout.strip().split("\n")[-1], (
@@ -142,7 +154,7 @@ def test_version_pinning_with_branch_pulls_latest():
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="test",
+            settings_id=PROJECT_NAME,
             omop_es_branch="master",
             batched=False,
             output_directory="",
@@ -165,7 +177,7 @@ def test_version_pinning_with_commit_sha():
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="test",
+            settings_id=PROJECT_NAME,
             omop_es_branch=test_sha,
             batched=False,
             output_directory="",
@@ -188,7 +200,7 @@ def test_version_pinning_fails_with_invalid_sha():
         with disable_run_logger():
             run_omop_es.run_omop_es_docker.fn(
                 working_dir=run_omop_es.ROOT_PATH,
-                settings_id="test",
+                settings_id=PROJECT_NAME,
                 omop_es_branch=test_sha,
                 batched=False,
                 output_directory="",
