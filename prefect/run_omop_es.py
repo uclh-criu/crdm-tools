@@ -15,16 +15,20 @@
 
 import datetime
 import os
+import re
 import subprocess
 from pathlib import Path
 
-from prefect import flow, runtime, task
+import dotenv
+from prefect import flow, logging, runtime, task
 
 from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
 DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
 IS_PROD = os.environ.get("ENVIRONMENT", "dev") == "prod"
+
+logger = logging.get_logger()
 
 
 def name_with_timestamp() -> str:
@@ -64,15 +68,37 @@ def run_omop_es(
         output_directory: Custom output directory path
         zip_output: Whether to compress output
     """
+    pinned_version = pin_omop_es_version(omop_es_version)
     build_docker(ROOT_PATH, project_name=settings_id)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
-        omop_es_version=omop_es_version,
+        omop_es_version=pinned_version,
         batched=batched,
         output_directory=output_directory,
         zip_output=zip_output,
     )
+
+
+@task()
+def pin_omop_es_version(ref: str) -> str:
+    """
+    Finds the latest commit hash for the given OMOP_ES ref.
+
+    Args:
+        ref: The OMOP_ES ref to find the latest commit hash for. Can be a branch, tag, or commit SHA.
+
+    Returns:
+        The latest commit hash for the given OMOP_ES ref.
+    """
+    dotenv.load_dotenv()
+    github_pat = os.environ.get("GITHUB_PAT")
+    omop_es_url = f"https://{github_pat}@github.com/uclh-criu/omop_es.git"
+
+    sha = get_latest_commit_sha(omop_es_url, ref)
+
+    logger.info("Pinning OMOP_ES version to %s", sha)
+    return sha
 
 
 @task(retries=10, retry_delay_seconds=10)
@@ -134,3 +160,83 @@ def run_omop_es_docker(
         "omop_es",
     ]
     return run_subprocess(working_dir, args, env)
+
+
+def get_latest_commit_sha(repo_url: str, ref: str) -> str:
+    """
+    Get the latest commit SHA for a given reference.
+    If ref is already a valid SHA, return it directly.
+
+    Args:
+        repo_url: URL of the repository
+        ref: Reference to the commit (e.g., branch name or tag)
+
+    Returns:
+        Latest commit SHA
+
+    Raises:
+        RuntimeError: If the git command fails to execute
+        ValueError: If the SHA format is invalid
+    """
+    validate_ref(repo_url, ref)
+
+    if is_valid_sha(ref):
+        return ref
+
+    try:
+        result = subprocess.run(
+            ["git", "ls-remote", repo_url, ref],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to get latest commit SHA for {repo_url}/{ref}: {e}")
+
+    sha = result.stdout.strip().split("\t")[0]
+    if is_valid_sha(sha):
+        return sha
+
+    raise ValueError(f"Invalid SHA format for {repo_url}/{ref}: {sha}")
+
+
+def validate_ref(repo_url: str, ref: str):
+    """
+    Validate a reference (branch, tag, or commit SHA) in a Git repository.
+
+    Args:
+        repo_url: URL of the repository
+        ref: Reference to the commit (e.g., branch name, tag or commit sha)
+
+    Raises:
+        RuntimeError: If the ref is invalid or does not exist in the repository
+    """
+
+    # git fetch only works with full-length SHA
+    if is_valid_sha(ref) and len(ref) < 40:
+        logger.warning("Short SHA provided, impossible to validate.")
+        return
+
+    try:
+        subprocess.check_call(
+            ["git", "fetch", repo_url, ref],
+            # we don't care about the output here
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to fetch reference {ref} from {repo_url}") from e
+
+
+def is_valid_sha(sha: str) -> bool:
+    """
+    Check if string matches SHA format (40 hex characters for long or 7 for short SHA).
+
+    Args:
+        sha: String to check
+
+    Returns:
+        True if format is valid, False otherwise
+    """
+    pattern = r"^[a-fA-F0-9]{7,40}$"
+    return bool(re.match(pattern, sha))
