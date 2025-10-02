@@ -37,8 +37,8 @@ cd $OMOP_ES_DIR
 
 # Check out the specified version
 git fetch --all --tags --quiet
+echo "Running omop_es from ref: ${OMOP_ES_VERSION}"
 git checkout "${OMOP_ES_VERSION}"
-echo "Running omop_es from commit: $(git rev-parse --short HEAD)"
 
 # Run the batched process if specified, otherwise run the simple process
 # Variables are passed through from the environment

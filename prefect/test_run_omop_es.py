@@ -14,7 +14,6 @@
 ################################################################################
 
 import os
-import subprocess
 
 import pytest
 from freezegun import freeze_time
@@ -150,25 +149,13 @@ def test_run_omop_es_docker_can_run_batched():
     )
 
 
-def test_version_pinning_with_branch_pulls_latest():
-    """Test that using a branch name results in git pull being called."""
-    os.environ["DEBUG"] = "true"
+def test_version_pinning_with_branch():
+    """Test that using a branch name pins to specific commit."""
 
     with disable_run_logger():
-        result = run_omop_es.run_omop_es_docker.fn(
-            working_dir=run_omop_es.ROOT_PATH,
-            settings_id=PROJECT_NAME,
-            omop_es_version="master",
-            batched=False,
-            output_directory="",
-            zip_output=False,
-        )
+        result = run_omop_es.pin_omop_es_version.fn(ref="master")
 
-    # Shell output goes to stderr due to set -x in bash script
-    output = result.stdout.strip().split("\n")
-    assert "Checking out latest from branch: master" in output, (
-        f"Expected branch checkout message in stdout output: {output}"
-    )
+    assert run_omop_es.is_valid_sha(result)
 
 
 def test_version_pinning_with_commit_sha():
@@ -188,7 +175,7 @@ def test_version_pinning_with_commit_sha():
         )
 
     output = result.stdout.strip().split("\n")
-    assert f"Checking out pinned version: {test_sha}" in output, (
+    assert f"Running omop_es from ref: {test_sha}" in output, (
         f"Expected version checkout message in stdout output: {output}"
     )
 
@@ -199,13 +186,6 @@ def test_version_pinning_fails_with_invalid_sha():
 
     test_sha = "invalid_sha"
 
-    with pytest.raises(subprocess.CalledProcessError):
+    with pytest.raises(RuntimeError, match="Failed to fetch reference"):
         with disable_run_logger():
-            run_omop_es.run_omop_es_docker.fn(
-                working_dir=run_omop_es.ROOT_PATH,
-                settings_id=PROJECT_NAME,
-                omop_es_version=test_sha,
-                batched=False,
-                output_directory="",
-                zip_output=False,
-            )
+            run_omop_es.pin_omop_es_version.fn(ref=test_sha)

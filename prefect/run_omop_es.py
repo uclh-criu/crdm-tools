@@ -94,7 +94,11 @@ def pin_omop_es_version(ref: str) -> str:
     github_pat = os.environ.get("GITHUB_PAT")
     omop_es_url = f"https://{github_pat}@github.com/uclh-criu/omop_es.git"
 
-    sha = get_latest_commit_sha(omop_es_url, ref)
+    try:
+        sha = get_latest_commit_sha(omop_es_url, ref)
+    except RuntimeError:
+        logger.error(f"Invalid OMOP_ES ref: {ref}")
+        raise
 
     logger.info("Pinning OMOP_ES version to %s", sha)
     return sha
@@ -175,8 +179,7 @@ def get_latest_commit_sha(repo_url: str, ref: str) -> str:
         Latest commit SHA
 
     Raises:
-        RuntimeError: If the git command fails to execute
-        ValueError: If the SHA format is invalid
+        RuntimeError: If the git command fails to execute or if the SHA format is invalid
     """
     validate_ref(repo_url, ref)
 
@@ -197,7 +200,7 @@ def get_latest_commit_sha(repo_url: str, ref: str) -> str:
     if is_valid_sha(sha):
         return sha
 
-    raise ValueError(f"Invalid SHA format for {repo_url}/{ref}: {sha}")
+    raise RuntimeError(f"Invalid SHA format for {repo_url}/{ref}: {sha}")
 
 
 def validate_ref(repo_url: str, ref: str):
