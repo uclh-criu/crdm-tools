@@ -24,6 +24,7 @@ import run_omop_es
 import run_subprocess
 
 PROJECT_NAME = "test_project"
+OMOP_ES_VERSION = "master"
 
 
 @pytest.fixture(autouse=True)
@@ -33,6 +34,7 @@ def rebuild_test_docker():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             project_name=PROJECT_NAME,
+            omop_es_version=OMOP_ES_VERSION,
         )
 
 
@@ -77,6 +79,7 @@ def test_build_docker():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             project_name="my-project",
+            omop_es_version=OMOP_ES_VERSION,
             dry_run=True,
         )
 

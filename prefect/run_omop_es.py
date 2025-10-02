@@ -62,14 +62,13 @@ def run_omop_es(
 
     Args:
         settings_id: Project settings identifier
-        omop_es_version: Git ref to use - can be a branch name (pulls latest),
-                       commit SHA (pins to specific version), or tag name (pins to release)
+        omop_es_version: Git ref to use - can be a branch name, commit SHA, or tag name
         batched: Whether to run in batched mode
         output_directory: Custom output directory path
         zip_output: Whether to compress output
     """
     pinned_version = pin_omop_es_version(omop_es_version)
-    build_docker(ROOT_PATH, project_name=settings_id)
+    build_docker(ROOT_PATH, project_name=settings_id, omop_es_version=pinned_version)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
@@ -105,10 +104,9 @@ def pin_omop_es_version(ref: str) -> str:
 def build_docker(
     working_dir: Path,
     project_name: str,
-    build_args: list[str] = [],
+    omop_es_version: str,
     dry_run: bool = False,
 ) -> None:
-    build_args = build_args or []
     args = [
         "docker",
         "compose",
@@ -118,6 +116,8 @@ def build_docker(
         project_name,
         "build",
         "omop_es",
+        "--build-arg",
+        f"OMOP_ES_VERSION={omop_es_version}",
     ]
     run_subprocess(working_dir, args)
 
