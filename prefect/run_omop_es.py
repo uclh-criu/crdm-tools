@@ -90,8 +90,10 @@ def pin_omop_es_version(ref: str) -> str:
     Returns:
         The latest commit hash for the given OMOP_ES ref.
     """
-    dotenv.load_dotenv()
+    dotenv.load_dotenv(ROOT_PATH / ".env")
     github_pat = os.environ.get("GITHUB_PAT")
+    if not github_pat:
+        raise ValueError("GITHUB_PAT environment variable not set")
     omop_es_url = f"https://{github_pat}@github.com/uclh-criu/omop_es.git"
 
     try:

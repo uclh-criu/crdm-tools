@@ -48,7 +48,7 @@ reset-prefect-database: uv-exists ## Reset the Prefect database
 	$(UVRUN) prefect server database reset -y
 
 test: uv-exists ## Run tests of our Prefect functionality
-	$(UVRUN) pytest . -s
+	$(UVRUN) pytest . -s --log-cli-level=INFO
 
 uv-exists: ## Check if uv is available
 	$(call assert_command_exists, uv, "Please install uv: https://docs.astral.sh/uv/getting-started/installation/")
