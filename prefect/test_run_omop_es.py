@@ -118,6 +118,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
     # String values of the arguments we passed into the function 👆
     expected_env_values = {
         "SETTINGS_ID": PROJECT_NAME,
+        "OMOP_ES_VERSION": "master",
         "BATCHED": "False",
         "OUTPUT_DIRECTORY": "",
         "ZIP_OUTPUT": "False",
@@ -149,19 +150,9 @@ def test_run_omop_es_docker_can_run_batched():
     )
 
 
-def test_version_pinning_with_branch():
-    """Test that using a branch name pins to specific commit."""
-
-    with disable_run_logger():
-        result = run_omop_es.pin_omop_es_version.fn(ref="master")
-
-    assert run_omop_es.is_valid_sha(result)
-
-
 def test_version_pinning_with_commit_sha():
     """Test that using a commit SHA results in pinned checkout (no git pull)."""
     os.environ["DEBUG"] = "true"
-
     test_sha = "f439272"
 
     with disable_run_logger():
@@ -180,10 +171,16 @@ def test_version_pinning_with_commit_sha():
     )
 
 
+def test_version_pinning_with_branch():
+    """Test that using a branch name pins to specific commit."""
+    with disable_run_logger():
+        result = run_omop_es.pin_omop_es_version.fn(ref="master")
+
+    assert run_omop_es.is_valid_sha(result)
+
+
 def test_version_pinning_fails_with_invalid_sha():
     """Test that using an invalid commit SHA results in an error."""
-    os.environ["DEBUG"] = "true"
-
     test_sha = "invalid_sha"
 
     with pytest.raises(RuntimeError, match="Failed to fetch reference"):

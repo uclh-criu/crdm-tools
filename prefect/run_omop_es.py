@@ -94,7 +94,9 @@ def pin_omop_es_version(ref: str) -> str:
     github_pat = os.environ.get("GITHUB_PAT")
     if not github_pat:
         raise ValueError("GITHUB_PAT environment variable not set")
-    omop_es_url = f"https://{github_pat}@github.com/uclh-criu/omop_es.git"
+    omop_es_url = (
+        f"https://x-access-token:{github_pat}@github.com/uclh-criu/omop_es.git"
+    )
 
     try:
         sha = get_latest_commit_sha(omop_es_url, ref)
