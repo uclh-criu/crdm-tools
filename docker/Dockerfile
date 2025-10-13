@@ -78,7 +78,9 @@ RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
 RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
 ARG OMOP_ES_VERSION="master"
-RUN git -C ./omop_es checkout ${OMOP_ES_VERSION}
+# Well that's fun, it was trying to check out the commit not the branch
+# see http://uclvlddpragae10:8082/runs/flow-run/3d83049f-ded0-47a3-8f3f-953c512aede9
+RUN git -C ./omop_es checkout stefpiatek/batch_memory
 
 # Final omop_es image
 FROM base AS omop_es
