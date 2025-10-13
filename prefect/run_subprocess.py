@@ -28,35 +28,17 @@ def run_subprocess(
 ) -> subprocess.CompletedProcess:
     """Helper to run subprocesses, logging stderr."""
     logger = logging.get_run_logger()
-    logger.info(f"Running subprocess: {' '.join(args)}")
+    logger.info(f"Running subprocess without logs: {' '.join(args)}")
 
-    with subprocess.Popen(
-        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=working_dir, env=env
-    ) as proc:
-        stdout_lines = []
-        stderr_lines = []
-
-        # Stream stdout and stderr in real-time
-        if proc.stdout:
-            for line in iter(proc.stdout.readline, b""):
-                log(line, logger)
-                stdout_lines.append(line.decode())
-
-        if proc.stderr:
-            stderr = proc.stderr.read()
-            stderr_lines = [x.decode() for x in stderr.splitlines()]
-
-        proc.wait()
-
-    stdout = "\n".join(stdout_lines)
-    stderr = "\n".join(stderr_lines)
-    if stderr:
-        log_level = logger.error if proc.returncode != 0 else logger.debug
-        log_level(stderr)
+    proc = subprocess.run(
+        args, cwd=working_dir, env=env
+    )
+    stdout = []
+    stderr = []
 
     if proc.returncode != 0:
         raise subprocess.CalledProcessError(
-            proc.returncode, args, output=stdout, stderr=stderr
+            proc.returncode, args, stdout, stderr
         )
     return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
 
