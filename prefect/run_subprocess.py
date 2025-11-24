@@ -30,16 +30,12 @@ def run_subprocess(
     logger = logging.get_run_logger()
     logger.info(f"Running subprocess without logs: {' '.join(args)}")
 
-    proc = subprocess.run(
-        args, cwd=working_dir, env=env
-    )
+    proc = subprocess.run(args, cwd=working_dir, env=env)
     stdout = []
     stderr = []
 
     if proc.returncode != 0:
-        raise subprocess.CalledProcessError(
-            proc.returncode, args, stdout, stderr
-        )
+        raise subprocess.CalledProcessError(proc.returncode, args, stdout, stderr)
     return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
 
 
