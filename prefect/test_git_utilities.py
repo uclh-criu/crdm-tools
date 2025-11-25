@@ -22,7 +22,7 @@ import pytest
 import run_omop_es
 
 
-def run_subprocess(
+def run_subprocess_with_defaults(
     command, cwd=None, check=True, capture_output=True, text=False
 ) -> subprocess.CompletedProcess:
     """Run a subprocess command and return the output."""
@@ -50,35 +50,35 @@ def mock_git_repo(temp_gitrepo):
 
     # Initialize git repo; note that `git init -b` doesn't work on the GAE's version of git
     # so we switch to 'main' branch explicitly
-    run_subprocess(["git", "init"])
-    run_subprocess(["git", "checkout", "-b", "main"])
-    run_subprocess(["git", "config", "user.email", "test@test.com"])
-    run_subprocess(["git", "config", "user.name", "Test User"])
+    run_subprocess_with_defaults(["git", "init"])
+    run_subprocess_with_defaults(["git", "checkout", "-b", "main"])
+    run_subprocess_with_defaults(["git", "config", "user.email", "test@test.com"])
+    run_subprocess_with_defaults(["git", "config", "user.name", "Test User"])
 
     # Create initial commit
     (repo_path / "README.md").write_text("Initial commit")
-    run_subprocess(["git", "add", "."], check=True, capture_output=True)
-    run_subprocess(
+    run_subprocess_with_defaults(["git", "add", "."], check=True, capture_output=True)
+    run_subprocess_with_defaults(
         ["git", "commit", "-m", "Initial commit"],
         check=True,
         capture_output=True,
     )
 
     # Get the commit SHA
-    result = run_subprocess(["git", "rev-parse", "HEAD"], text=True)
+    result = run_subprocess_with_defaults(["git", "rev-parse", "HEAD"], text=True)
     commit_sha = result.stdout.strip()
 
     # Create a tag
-    run_subprocess(["git", "tag", "v1.0.0"])
+    run_subprocess_with_defaults(["git", "tag", "v1.0.0"])
 
     # Create a feature branch
-    run_subprocess(["git", "checkout", "-b", "feature"])
+    run_subprocess_with_defaults(["git", "checkout", "-b", "feature"])
     (repo_path / "feature.txt").write_text("Feature content")
-    run_subprocess(["git", "add", "."])
-    run_subprocess(["git", "commit", "-m", "Add feature"])
+    run_subprocess_with_defaults(["git", "add", "."])
+    run_subprocess_with_defaults(["git", "commit", "-m", "Add feature"])
 
     # Switch back to main
-    run_subprocess(["git", "checkout", "main"])
+    run_subprocess_with_defaults(["git", "checkout", "main"])
 
     return {
         "path": repo_path,
