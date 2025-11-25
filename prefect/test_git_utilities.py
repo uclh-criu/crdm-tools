@@ -13,91 +13,72 @@
 #  limitations under the License.
 ################################################################################
 
+import os
 import subprocess
+from pathlib import Path
 
 import pytest
 
 import run_omop_es
 
 
+def run_subprocess(
+    command, cwd=None, check=True, capture_output=True, text=False
+) -> subprocess.CompletedProcess:
+    """Run a subprocess command and return the output."""
+    result = subprocess.run(
+        command, cwd=cwd, check=check, capture_output=capture_output, text=text
+    )
+    return result
+
+
 @pytest.fixture(scope="session")
-def mock_git_repo(tmp_path_factory):
-    """Create a temporary git repository with branches, tags, and commits for testing."""
+def temp_gitrepo(tmp_path_factory):
+    """Creates a temporary directory with git repository and changes to it."""
+    old_wd = os.getcwd()
     repo_path = tmp_path_factory.mktemp("test_repo")
+    os.chdir(repo_path)
+    yield
+    os.chdir(old_wd)
+
+
+@pytest.fixture(scope="session")
+def mock_git_repo(temp_gitrepo):
+    """Create a temporary git repository with branches, tags, and commits for testing."""
+
+    repo_path = Path(os.getcwd())
 
     # Initialize git repo; note that `git init -b` doesn't work on the GAE's version of git
     # so we switch to 'main' branch explicitly
-    subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "checkout", "-b", "main"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
+    run_subprocess(["git", "init"])
+    run_subprocess(["git", "checkout", "-b", "main"])
+    run_subprocess(["git", "config", "user.email", "test@test.com"])
+    run_subprocess(["git", "config", "user.name", "Test User"])
 
     # Create initial commit
     (repo_path / "README.md").write_text("Initial commit")
-    subprocess.run(["git", "add", "."], cwd=repo_path, check=True, capture_output=True)
-    subprocess.run(
+    run_subprocess(["git", "add", "."], check=True, capture_output=True)
+    run_subprocess(
         ["git", "commit", "-m", "Initial commit"],
-        cwd=repo_path,
         check=True,
         capture_output=True,
     )
 
     # Get the commit SHA
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    result = run_subprocess(["git", "rev-parse", "HEAD"], text=True)
     commit_sha = result.stdout.strip()
 
     # Create a tag
-    subprocess.run(
-        ["git", "tag", "v1.0.0"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
+    run_subprocess(["git", "tag", "v1.0.0"])
 
     # Create a feature branch
-    subprocess.run(
-        ["git", "checkout", "-b", "feature"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
+    run_subprocess(["git", "checkout", "-b", "feature"])
     (repo_path / "feature.txt").write_text("Feature content")
-    subprocess.run(["git", "add", "."], cwd=repo_path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Add feature"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
+    run_subprocess(["git", "add", "."])
+    run_subprocess(["git", "commit", "-m", "Add feature"])
 
     # Switch back to main
-    subprocess.run(
-        ["git", "checkout", "main"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
+    run_subprocess(["git", "checkout", "main"])
 
     return {
         "path": repo_path,
