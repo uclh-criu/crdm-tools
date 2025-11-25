@@ -198,6 +198,7 @@ def get_latest_commit_sha(repo_url: str, ref: str) -> str:
             check=True,
         )
     except subprocess.CalledProcessError as e:
+        logger.error(e.stderr)
         raise RuntimeError(f"Failed to get latest commit SHA for {repo_url}/{ref}: {e}")
 
     sha = result.stdout.strip().split("\t")[0]
