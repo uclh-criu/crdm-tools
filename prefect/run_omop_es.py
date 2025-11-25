@@ -68,7 +68,7 @@ def run_omop_es(
         zip_output: Whether to compress output
     """
     pinned_version = pin_omop_es_version(omop_es_version)
-    build_docker(ROOT_PATH, project_name=settings_id, omop_es_version=pinned_version)
+    build_docker(ROOT_PATH, project_name=settings_id, omop_es_version=omop_es_version)
     run_omop_es_docker(
         working_dir=ROOT_PATH,
         settings_id=settings_id,
