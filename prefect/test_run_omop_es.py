@@ -27,7 +27,7 @@ PROJECT_NAME = "test_project"
 OMOP_ES_VERSION = "master"
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="session")
 def rebuild_test_docker():
     """Rebuild the test docker image, to make sure it's up to date"""
     with disable_run_logger():
@@ -107,7 +107,7 @@ def wrapped_run_subrocess(*args, **kwargs):
     return run_subprocess.run_subprocess(*args, **kwargs)
 
 
-def test_run_omop_es_docker_sets_env_correctly(mocker):
+def test_run_omop_es_docker_sets_env_correctly(mocker, rebuild_test_docker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
     with disable_run_logger():
@@ -135,7 +135,7 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         )
 
 
-def test_run_omop_es_docker_can_run_batched():
+def test_run_omop_es_docker_can_run_batched(rebuild_test_docker):
     os.environ["DEBUG"] = "true"
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
@@ -155,10 +155,10 @@ def test_run_omop_es_docker_can_run_batched():
     )
 
 
-def test_version_pinning_with_commit_sha():
+def test_version_pinning_with_commit_sha(rebuild_test_docker):
     """Test that using a commit SHA results in pinned checkout (no git pull)."""
     os.environ["DEBUG"] = "true"
-    test_sha = "f439272"
+    test_sha = "f439272f850c4a86fb28ca142c2280494d85e364"
 
     with disable_run_logger():
         pinned_version = run_omop_es.pin_omop_es_version.fn(ref=test_sha)
@@ -183,12 +183,29 @@ def test_version_pinning_with_commit_sha():
 
 # Skip test on CI because failing for unknown reason
 @pytest.mark.skipif(os.environ.get("CI") == "true", reason="Skipping on CI")
-def test_version_pinning_with_branch():
-    """Test that using a branch name pins to specific commit."""
-    with disable_run_logger():
-        result = run_omop_es.pin_omop_es_version.fn(ref="master")
+def test_version_pinning_with_branch(rebuild_test_docker):
+    """Test that using a branch name pins to latest commit."""
+    os.environ["DEBUG"] = "true"
+    test_version = "master"
 
-    assert run_omop_es.is_valid_sha(result)
+    with disable_run_logger():
+        pinned_version = run_omop_es.pin_omop_es_version.fn(ref=test_version)
+        # This will run the git checkout with the pinned version, so should fail if it's invalid
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id=PROJECT_NAME,
+            omop_es_version=pinned_version,
+            batched=False,
+            output_directory="",
+            zip_output=False,
+        )
+
+    assert run_omop_es.is_valid_sha(pinned_version)
+
+    output = result.stdout.strip().split("\n")
+    assert f"Running omop_es from ref: {pinned_version}" in output, (
+        f"Expected version checkout message in stdout output: {output}"
+    )
 
 
 def test_version_pinning_fails_with_invalid_sha():
