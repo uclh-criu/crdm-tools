@@ -14,6 +14,7 @@
 ################################################################################
 
 import os
+from subprocess import CalledProcessError
 
 import pytest
 from freezegun import freeze_time
@@ -30,11 +31,15 @@ OMOP_ES_VERSION = "master"
 def rebuild_test_docker():
     """Rebuild the test docker image, to make sure it's up to date"""
     with disable_run_logger():
-        run_omop_es.build_docker.fn(
-            working_dir=run_omop_es.ROOT_PATH,
-            project_name=PROJECT_NAME,
-            omop_es_version=OMOP_ES_VERSION,
-        )
+        try:
+            run_omop_es.build_docker.fn(
+                working_dir=run_omop_es.ROOT_PATH,
+                project_name=PROJECT_NAME,
+                omop_es_version=OMOP_ES_VERSION,
+            )
+        except CalledProcessError as e:
+            print(f"stderr:\n{e.stderr}")
+            pytest.fail(f"Failed to build docker image: {e}")
 
 
 @freeze_time("2025-01-01")
