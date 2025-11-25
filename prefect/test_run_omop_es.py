@@ -161,6 +161,7 @@ def test_version_pinning_with_commit_sha():
     test_sha = "f439272"
 
     with disable_run_logger():
+        pinned_version = run_omop_es.pin_omop_es_version.fn(ref=test_sha)
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             settings_id=PROJECT_NAME,
@@ -169,6 +170,10 @@ def test_version_pinning_with_commit_sha():
             output_directory="",
             zip_output=False,
         )
+
+    assert pinned_version == test_sha, (
+        f"Expected pinned version '{test_sha}',\ngot '{pinned_version}'"
+    )
 
     output = result.stdout.strip().split("\n")
     assert f"Running omop_es from ref: {test_sha}" in output, (
