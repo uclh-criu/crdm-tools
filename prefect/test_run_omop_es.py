@@ -181,8 +181,6 @@ def test_version_pinning_with_commit_sha(rebuild_test_docker):
     )
 
 
-# Skip test on CI because failing for unknown reason
-@pytest.mark.skipif(os.environ.get("CI") == "true", reason="Skipping on CI")
 def test_version_pinning_with_branch(rebuild_test_docker):
     """Test that using a branch name pins to latest commit."""
     os.environ["DEBUG"] = "true"
