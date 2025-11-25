@@ -207,7 +207,7 @@ def get_latest_commit_sha(repo_url: str, ref: str) -> str:
     raise RuntimeError(f"Invalid SHA format for {repo_url}/{ref}: {sha}")
 
 
-def validate_ref(repo_url: str, ref: str):
+def validate_ref(repo_url: str, ref: str) -> None:
     """
     Validate a reference (branch, tag, or commit SHA) in a Git repository.
 
