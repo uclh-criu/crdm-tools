@@ -87,3 +87,21 @@ This process needs to be repeated for every GAE.
 
 Additionally record the token in the `GITHUB_PAT` environment variable in the `.env` file in this
 repository's root.
+
+## Development
+
+The main Prefect infrastructure is implemented in the [`prefect/`](./prefect/) directory. The
+Dockerfile and entrypoint script for the the `omop_es` pipeline is located in the
+[`docker/`](./docker) directory.
+
+We use [`pre-commit`](https://pre-commit.com/) to enforce code style and formatting. Install it by
+running `pip install pre-commit` and then run `pre-commit install` to install the hooks.
+
+### Testing
+
+Tests for the Prefect workflow can be run using the following command:
+
+```shell
+cd prefect
+make test
+```
