@@ -25,9 +25,14 @@ def mock_git_repo(tmp_path_factory):
     """Create a temporary git repository with branches, tags, and commits for testing."""
     repo_path = tmp_path_factory.mktemp("test_repo")
 
-    # Initialize git repo
+    # Initialize git repo; note that `git init -b` doesn't work on the GAE's version of git
+    # so we switch to 'main' branch explicitly
+    subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
     subprocess.run(
-        ["git", "init", "-b", "main"], cwd=repo_path, check=True, capture_output=True
+        ["git", "checkout", "-b", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
