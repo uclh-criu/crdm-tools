@@ -206,9 +206,9 @@ def test_version_pinning_with_branch(rebuild_test_docker):
     )
 
 
-def test_version_pinning_fails_with_invalid_sha():
-    """Test that using an invalid commit SHA results in an error."""
-    test_sha = "invalid_sha"
+def test_version_pinning_fails_with_invalid_ref():
+    """Test that using an invalid git ref raises an error."""
+    test_sha = "__idefinitelydontexist__"
 
     with pytest.raises(RuntimeError, match="Failed to fetch reference"):
         with disable_run_logger():
