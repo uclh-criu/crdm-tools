@@ -41,7 +41,7 @@ services:
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
     ports:
-      - "4200:4200"
+      - ${PREFECT_SERVER_PORT:-4200}:${PREFECT_SERVER_PORT:-4200}
 
   omop_es:
     env_file: "./omop_es/.env"
