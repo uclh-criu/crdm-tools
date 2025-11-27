@@ -28,27 +28,37 @@ def run_subprocess(
 ) -> subprocess.CompletedProcess:
     """Helper to run subprocesses, logging stderr."""
     logger = logging.get_run_logger()
+    logger.info(f"Running subprocess: {' '.join(args)}")
+
     with subprocess.Popen(
         args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=working_dir, env=env
     ) as proc:
-        out = []
+        stdout_lines = []
+        stderr_lines = []
 
-        for line in iter(proc.stdout.readline, b"") if proc.stdout else []:
-            log(line, logger)
-            out.append(line.decode())
+        # Stream stdout and stderr in real-time
+        if proc.stdout:
+            for line in iter(proc.stdout.readline, b""):
+                log(line, logger)
+                stdout_lines.append(line.decode())
 
-        _, stderr = proc.communicate()
+        if proc.stderr:
+            stderr = proc.stderr.read()
+            stderr_lines = [x.decode() for x in stderr.splitlines()]
 
-    stdout = "\n".join(out)
-    result = subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
+        proc.wait()
 
-    if result.returncode != 0:
-        logger.error(result.stderr)
+    stdout = "\n".join(stdout_lines)
+    stderr = "\n".join(stderr_lines)
+    if stderr:
+        log_level = logger.error if proc.returncode != 0 else logger.debug
+        log_level(stderr)
+
+    if proc.returncode != 0:
         raise subprocess.CalledProcessError(
-            result.returncode, args, output=stdout, stderr=stderr
+            proc.returncode, args, output=stdout, stderr=stderr
         )
-    logger.debug(result.stderr)
-    return result
+    return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
 
 
 def log(line: bytes, logger: Logger | LoggingAdapter) -> None:

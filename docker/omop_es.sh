@@ -33,8 +33,12 @@ ZIP_OUTPUT=$(tolower ${ZIP_OUTPUT:-false})
 MAIN_BATCHED="./main/batched.R"
 MAIN_COMMAND="./main/command.R"
 
-# Move to the OMOP_ES directory
 cd $OMOP_ES_DIR
+
+# Check out the specified version
+git fetch --all --tags --quiet
+echo "Running omop_es from ref: ${OMOP_ES_VERSION}"
+git checkout "${OMOP_ES_VERSION}"
 
 # Run the batched process if specified, otherwise run the simple process
 # Variables are passed through from the environment
@@ -57,11 +61,8 @@ if [ "$DEBUG" = "true" ]; then
 fi
 
 echo "Installing dependencies..."
-git checkout ${OMOP_ES_BRANCH} && git pull origin ${OMOP_ES_BRANCH}
 # Disable pak as this invalidates where we expect the cache to be
 Rscript -e "options(Ncpus=4, renv.config.pak.enabled=FALSE); renv::restore()"
-
-echo Running omop_es from commit: $(git rev-parse --short HEAD)
 
 if [ "$ENVIRONMENT" = "dev" ]; then
 	echo "Recreating mock database..."

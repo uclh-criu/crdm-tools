@@ -14,12 +14,32 @@
 ################################################################################
 
 import os
+from subprocess import CalledProcessError
 
+import pytest
 from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
 import run_omop_es
 import run_subprocess
+
+PROJECT_NAME = "test_project"
+OMOP_ES_VERSION = "master"
+
+
+@pytest.fixture(scope="session")
+def rebuild_test_docker():
+    """Rebuild the test docker image, to make sure it's up to date"""
+    with disable_run_logger():
+        try:
+            run_omop_es.build_docker.fn(
+                working_dir=run_omop_es.ROOT_PATH,
+                project_name=PROJECT_NAME,
+                omop_es_version=OMOP_ES_VERSION,
+            )
+        except CalledProcessError as e:
+            print(f"stderr:\n{e.stderr}")
+            pytest.fail(f"Failed to build docker image: {e}")
 
 
 @freeze_time("2025-01-01")
@@ -63,6 +83,7 @@ def test_build_docker():
         run_omop_es.build_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
             project_name="my-project",
+            omop_es_version=OMOP_ES_VERSION,
             dry_run=True,
         )
 
@@ -86,13 +107,14 @@ def wrapped_run_subrocess(*args, **kwargs):
     return run_subprocess.run_subprocess(*args, **kwargs)
 
 
-def test_run_omop_es_docker_sets_env_correctly(mocker):
+def test_run_omop_es_docker_sets_env_correctly(mocker, rebuild_test_docker):
     mocker.patch("run_omop_es.run_subprocess", wrapped_run_subrocess)
 
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="mock_project_settings",
+            settings_id=PROJECT_NAME,
+            omop_es_version="master",
             batched=False,
             output_directory="",
             zip_output=False,
@@ -100,7 +122,8 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
 
     # String values of the arguments we passed into the function 👆
     expected_env_values = {
-        "SETTINGS_ID": "mock_project_settings",
+        "SETTINGS_ID": PROJECT_NAME,
+        "OMOP_ES_VERSION": "master",
         "BATCHED": "False",
         "OUTPUT_DIRECTORY": "",
         "ZIP_OUTPUT": "False",
@@ -112,20 +135,81 @@ def test_run_omop_es_docker_sets_env_correctly(mocker):
         )
 
 
-def test_run_omop_es_docker_can_run_batched():
+def test_run_omop_es_docker_can_run_batched(rebuild_test_docker):
     os.environ["DEBUG"] = "true"
     with disable_run_logger():
         result = run_omop_es.run_omop_es_docker.fn(
             working_dir=run_omop_es.ROOT_PATH,
-            settings_id="mock_project_settings",
+            settings_id=PROJECT_NAME,
+            omop_es_version="master",
             batched=True,
             output_directory="foo",
             zip_output=True,
         )
 
-    expected_command = "Rscript ./main/batched.R --settings_id mock_project_settings --output_directory foo --zip_output"
+    expected_command = f"Rscript ./main/batched.R --settings_id {PROJECT_NAME} --output_directory foo --zip_output"
 
     ## Check that expected_command is the last line of result.stdout
     assert expected_command == result.stdout.strip().split("\n")[-1], (
         f"Expected command '{expected_command}',\ngot '{result.stdout}'"
     )
+
+
+def test_version_pinning_with_commit_sha(rebuild_test_docker):
+    """Test that using a commit SHA results in pinned checkout (no git pull)."""
+    os.environ["DEBUG"] = "true"
+    test_sha = "f439272f850c4a86fb28ca142c2280494d85e364"
+
+    with disable_run_logger():
+        pinned_version = run_omop_es.pin_omop_es_version.fn(ref=test_sha)
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id=PROJECT_NAME,
+            omop_es_version=test_sha,
+            batched=False,
+            output_directory="",
+            zip_output=False,
+        )
+
+    assert pinned_version == test_sha, (
+        f"Expected pinned version '{test_sha}',\ngot '{pinned_version}'"
+    )
+
+    output = result.stdout.strip().split("\n")
+    assert f"Running omop_es from ref: {test_sha}" in output, (
+        f"Expected version checkout message in stdout output: {output}"
+    )
+
+
+def test_version_pinning_with_branch(rebuild_test_docker):
+    """Test that using a branch name pins to latest commit."""
+    os.environ["DEBUG"] = "true"
+    test_version = "master"
+
+    with disable_run_logger():
+        pinned_version = run_omop_es.pin_omop_es_version.fn(ref=test_version)
+        # This will run the git checkout with the pinned version, so should fail if it's invalid
+        result = run_omop_es.run_omop_es_docker.fn(
+            working_dir=run_omop_es.ROOT_PATH,
+            settings_id=PROJECT_NAME,
+            omop_es_version=pinned_version,
+            batched=False,
+            output_directory="",
+            zip_output=False,
+        )
+
+    assert run_omop_es.is_valid_sha(pinned_version)
+
+    output = result.stdout.strip().split("\n")
+    assert f"Running omop_es from ref: {pinned_version}" in output, (
+        f"Expected version checkout message in stdout output: {output}"
+    )
+
+
+def test_version_pinning_fails_with_invalid_ref():
+    """Test that using an invalid git ref raises an error."""
+    test_sha = "__idefinitelydontexist__"
+
+    with pytest.raises(RuntimeError, match="Failed to fetch reference"):
+        with disable_run_logger():
+            run_omop_es.pin_omop_es_version.fn(ref=test_sha)

@@ -31,6 +31,9 @@ concurrency:
 
 jobs:
   check:
+    env:
+      RENV_PATHS_CACHE_HOST: ./.cache/renv
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -40,7 +43,16 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "0.6.1"
+          working-directory: ./prefect
           enable-cache: true
+
+      - name: Restore renv cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RENV_PATHS_CACHE_HOST }}
+          key: renv-${{ runner.os }}
+          restore-keys: |
+            uv-${{ runner.os }}
 
       - name: Use template environment files
         run: |
