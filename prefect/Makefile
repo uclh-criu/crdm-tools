@@ -21,6 +21,9 @@ help: ## Show this help
 clean:   ## Stop all Prefect services, take the server down, and reset the database, DESTRUCTIVE action!
 	$(DOCKER_COMPOSE) down prefect_server
 
+config: ## Display prefect config information
+	$(UVRUN) prefect config view --show-secrets
+
 deploy-all: uv-exists ## Deploy all Prefect flows
 	$(UVRUN) prefect --no-prompt deploy --all
 

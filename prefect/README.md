@@ -25,7 +25,14 @@ To spin up the server run:
 make start-server
 ```
 
-You should now see the dashboard live at http://localhost:4200/dashboard.
+You should now see the dashboard live at http://localhost:4200/dashboard (the port may be configured
+through the `PREFECT_SERVER_PORT` environment variable in the root `.env` file).
+
+To see the Prefect config, including connection details, run:
+
+```shell
+make config
+```
 
 The Prefect server is running inside a Docker container. You can access the logs for the server by
 running (the `-f` option will continuously stream the logs):
