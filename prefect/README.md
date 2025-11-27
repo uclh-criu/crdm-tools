@@ -27,8 +27,12 @@ make start-server
 
 You should now see the dashboard live at http://localhost:4200/dashboard.
 
-Note that this will run in the foreground and so block your shell. We recommend running this in a
-`tmux` (or similar) session.
+The Prefect server is running inside a Docker container. You can access the logs for the server by
+running (the `-f` option will continuously stream the logs):
+
+```shell
+docker logs -f prefect-server
+```
 
 ### Starting a worker
 
@@ -65,6 +69,11 @@ make deploy
 
 This will open an interactive shell where you can select a specific flow to deploy.
 
+**Note**: when prompted by prefect
+`? Would you like to save configuration for this deployment for faster deployments in the future?`,
+you typically want to reject by typing `n` to avoid Prefect overwriting the existing configuration
+in `prefect.yaml` and potentially hardcoding absolute file paths.
+
 Alternatively you can create all deployments defined in `prefect.yaml` by running:
 
 ```shell
@@ -83,21 +92,25 @@ To manually trigger a flow run, you can use the dashboard or the Prefect CLI:
 uv run prefect deployment run <deployment_name>
 ```
 
-### Cleaning up
+### Stopping the server
 
-To stop everything (including the server):
+To stop the server:
 
 ```shell
 make stop
 ```
 
-To just stop the worker pool and keep the server up:
+This will preserve existing deployments and settings. Workers will also continue to run but will be
+suspended until the server is restarted.
 
-```shell
-make stop-pool
-```
+### Cleaning up
 
 To stop all Prefect services, take the server down, and reset the database:
+
+<!--prettier-ignore-->
+> [!WARNING]
+> This is a destructive operation. It will delete all deployments, flows, tasks, and data stored in the Prefect database.
+> This operation cannot be undone.
 
 ```shell
 make clean
