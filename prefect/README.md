@@ -56,7 +56,7 @@ show up in the Prefect dashboard).
 [Prefect flows](https://docs.prefect.io/v3/concepts/flows) should be run. Their configuration is
 defined in [`prefect.yaml`](./prefect.yaml).
 
-In yet again a different terminal window/session than where you started the worker, create a
+In a third terminal window/session, different than where you started the worker or server, create a
 deployment by running:
 
 ```shell
