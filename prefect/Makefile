@@ -43,7 +43,7 @@ stop-server: ## Stop the Prefect server
 	$(DOCKER_COMPOSE) stop prefect_server
 
 delete-pool: uv-exists ## Delete the Prefect worker pool
-	$(UVRUN) prefect work-pool delete '${WORK_POOL_NAME}' # allow failure in case pool does not exist
+	-$(UVRUN) prefect work-pool delete '${WORK_POOL_NAME}' # allow failure in case pool does not exist
 
 reset-prefect-database: ## Reset the Prefect database, DESTRUCTIVE action!
 	$(DOCKER_COMPOSE) exec prefect_server prefect server database reset -y
