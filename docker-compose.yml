@@ -36,6 +36,13 @@ x-github-pat: &github-pat
   GITHUB_PAT: ${GITHUB_PAT}
 
 services:
+  prefect_server:
+    env_file: "./prefect/.env"
+    image: prefecthq/prefect:3-latest
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - "4200:4200"
+
   omop_es:
     env_file: "./omop_es/.env"
     build:
