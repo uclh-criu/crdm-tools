@@ -1,6 +1,8 @@
 # Scheduling pipeline runs with Prefect
 
-> [!WARNING] EXPERIMENTAL
+<!--prettier-ignore-->
+> [!WARNING]
+> EXPERIMENTAL
 
 ## Quickstart
 
