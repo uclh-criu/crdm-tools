@@ -7,6 +7,7 @@ define assert_command_exists
 	fi
 endef
 
+DOCKER_COMPOSE := docker compose -f ../docker-compose.yml
 UVRUN := uv run --env-file .env
 WORK_POOL_NAME := omop_es-worker
 
@@ -17,11 +18,8 @@ help: ## Show this help
         | column -t -s '|'
 	@echo
 
-clean:   ## Stop all Prefect services, take the server down, and reset the database
-	$(MAKE) delete-pool
-	$(MAKE) stop-server
-	$(MAKE) reset-prefect-database
-	rm -rf /tmp/runner_storage
+clean:   ## Stop all Prefect services, take the server down, and reset the database, DESTRUCTIVE action!
+	$(DOCKER_COMPOSE) down prefect_server
 
 deploy-all: uv-exists ## Deploy all Prefect flows
 	$(UVRUN) prefect --no-prompt deploy --all
@@ -35,17 +33,17 @@ start-worker: start-pool ## Start a Prefect worker of type 'process'
 start-pool: uv-exists ## Start a Prefect worker pool
 	-$(UVRUN) prefect work-pool create '${WORK_POOL_NAME}' --type process --overwrite
 
-start-server: uv-exists ## Start the Prefect server
-	-$(UVRUN) prefect server start  # allow failure in case server already running
+start-server: ## Start the Prefect server
+	$(DOCKER_COMPOSE) up -d prefect_server
 
-stop-server: uv-exists ## Stop the Prefect server
-	$(UVRUN) prefect server stop
+stop-server: ## Stop the Prefect server
+	$(DOCKER_COMPOSE) stop prefect_server
 
 delete-pool: uv-exists ## Delete the Prefect worker pool
-	-$(UVRUN) prefect work-pool delete '${WORK_POOL_NAME}' # allow failure in case pool does not exist
+	$(UVRUN) prefect work-pool delete '${WORK_POOL_NAME}' # allow failure in case pool does not exist
 
-reset-prefect-database: uv-exists ## Reset the Prefect database
-	$(UVRUN) prefect server database reset -y
+reset-prefect-database: ## Reset the Prefect database, DESTRUCTIVE action!
+	$(DOCKER_COMPOSE) exec prefect_server prefect server database reset -y
 
 test: uv-exists ## Run tests of our Prefect functionality
 	$(UVRUN) pytest . -s --log-cli-level=INFO
