@@ -62,7 +62,6 @@ jobs:
           cp prefect/template.env prefect/.env
 
       - name: Run pytest
-        working-directory: ./prefect
         env:
           GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         run: |
