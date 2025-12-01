@@ -104,7 +104,7 @@ uv run prefect deployment run <deployment_name>
 To stop the server:
 
 ```shell
-make stop
+make stop-server
 ```
 
 This will preserve existing deployments and settings. Workers will also continue to run but will be
