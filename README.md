@@ -5,9 +5,160 @@ This repository provides infrastructure tools to run
 [`omop-cascade`](https://github.com/uclh-criu/omop-cascade) in containerised environments on the
 GAE.
 
-In addition, the [`prefect/` directory](prefect/README.md) provides data workflow orchestration with
+In addition, the [`prefect/` directory](prefect/) provides data workflow orchestration with
 [Prefect](https://docs.prefect.io/v3/get-started/index) to allow automatic scheduling of `omop_es`
 runs.
+
+## Deploying the Prefect infrastructure
+
+<!--prettier-ignore-->
+> [!WARNING]
+> EXPERIMENTAL
+
+First set the required environment variables:
+
+```shell
+cp template.env .env
+```
+
+and fill out the `.env` file as needed.
+
+We provide a `Makefile` to run the relevant deployment commands. Run `make help` to see the
+available commands.
+
+### Starting the server
+
+To spin up the server run:
+
+```shell
+make start-server
+```
+
+You should now see the dashboard live at http://localhost:4200/dashboard. The port can be configured
+through the `PREFECT_SERVER_API_PORT` environment variable.
+
+To see the Prefect config, including connection details, run:
+
+```shell
+make config
+```
+
+The Prefect server is running inside a Docker container. You can access the logs for the server by
+running (the `-f` option will continuously stream the logs):
+
+```shell
+docker compose logs -f prefect_server
+```
+
+### Starting a worker
+
+Before deploying Prefect flows, we need an active
+[worker pool](https://docs.prefect.io/v3/concepts/work-pools). To run any of the deployed flows, we
+also need a running worker in that pool.
+
+At the moment, we are using simple ["process" workers](https://docs.prefect.io/v3/concepts/workers),
+meaning the worker will run in a subprocess from wherever the worker is started.
+
+To start a worker, run the following command in a different terminal window/session than where you
+started the server:
+
+```shell
+make start-worker
+```
+
+This will run in the foreground and block your shell, so run this in a `tmux` (or similar) session.
+You can use this to monitor the logs for any flow that uses this worker (the logs will also show up
+in the Prefect dashboard).
+
+### Deploying Prefect flows
+
+[Deployments](https://docs.prefect.io/v3/concepts/deployments) are used to configure how
+[Prefect flows](https://docs.prefect.io/v3/concepts/flows) should be run. Their configuration is
+defined in [`prefect.yaml`](./prefect.yaml).
+
+In a third terminal window/session, different than where you started the worker or server, create a
+deployment by running:
+
+```shell
+make deploy
+```
+
+This will open an interactive shell where you can select a specific flow to deploy.
+
+**Note**: when prompted by prefect
+`? Would you like to save configuration for this deployment for faster deployments in the future?`,
+you typically want to reject by typing `n` to avoid Prefect overwriting the existing configuration
+in `prefect.yaml` and potentially hardcoding absolute file paths.
+
+Alternatively you can create all deployments defined in `prefect.yaml` by running:
+
+```shell
+make deploy-all
+```
+
+This will push the configuration for the Prefect flows to the server and make them ready to run. You
+should now be able to see any deployments you created at in the Deployments section of the Prefect
+dashboard.
+
+If any of the deployments have a [schedule](https://docs.prefect.io/v3/concepts/schedules), they
+will start running automatically based on their schedule.
+
+To manually trigger a flow run, you can use the dashboard or the Prefect CLI:
+
+```shell
+uv run prefect deployment run '<deployment_name>'
+```
+
+### Stopping the server
+
+To stop the server:
+
+```shell
+make stop-server
+```
+
+This will preserve existing deployments and settings. Workers will also continue to run but will be
+suspended until the server is restarted.
+
+### Cleaning up
+
+To stop all Prefect services, take the server down, and reset the database:
+
+<!--prettier-ignore-->
+> [!WARNING]
+> This is a destructive operation. It will delete all deployments, flows, tasks, and data stored in the Prefect database.
+> This operation cannot be undone.
+
+```shell
+make clean
+```
+
+## Configuring projects
+
+_Under construction_
+
+## Deploy Prefect on the GAE
+
+To run Prefect on the GAE, make sure to set the following environment variables in `prefect/.env`:
+
+```shell
+# For GAE10, will differ for other GAE instances
+PREFECT_SERVER_API_HOST=uclvlddpragae10
+PREFECT_SERVER_API_PORT=8082
+PREFECT_API_URL=http://uclvlddpragae10:8082/api
+```
+
+For unknown reasons, the GAE is unable to serve the Prefect server on the default `4200` port. With
+these settings, the dashboard will be hosted at `http://uclvlddpragae10:8082/dashboard` (accessible
+through the UCLH network only).
+
+When running `prefect` commands (see above) on a GAE, make sure the GAE's address is included in the
+`NO_PROXY` environment variable in the `.env` file and run `uv` with the `--env-file .env` flag, as
+`prefect` doesn't pick up this variable automatically:
+
+```shell
+NO_PROXY="localhost,127.0.0.1,uclvlddpragae10"
+```
 
 ## Building the images
 
@@ -102,6 +253,5 @@ running `pip install pre-commit` and then run `pre-commit install` to install th
 Tests for the Prefect workflow can be run using the following command:
 
 ```shell
-cd prefect
 make test
 ```
