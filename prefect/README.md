@@ -38,7 +38,7 @@ The Prefect server is running inside a Docker container. You can access the logs
 running (the `-f` option will continuously stream the logs):
 
 ```shell
-docker logs -f prefect-server
+docker compose logs -f prefect_server
 ```
 
 ### Starting a worker
