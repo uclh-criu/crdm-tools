@@ -7,7 +7,7 @@ define assert_command_exists
 	fi
 endef
 
-DOCKER_COMPOSE := docker compose -f ../docker-compose.yml
+DOCKER_COMPOSE := docker compose -f docker-compose.yml
 UVRUN := uv run --env-file .env
 WORK_POOL_NAME := omop_es-worker
 
@@ -17,9 +17,6 @@ help: ## Show this help
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%s\033[0m|%s\n", $$1, $$2}' \
         | column -t -s '|'
 	@echo
-
-clean:   ## Stop all Prefect services, take the server down, and reset the database, DESTRUCTIVE action!
-	$(DOCKER_COMPOSE) down prefect_server
 
 config: ## Display prefect config information
 	$(UVRUN) prefect config view --show-secrets
@@ -47,6 +44,9 @@ delete-pool: uv-exists ## Delete the Prefect worker pool
 
 reset-prefect-database: ## Reset the Prefect database, DESTRUCTIVE action! Requires the container to be running
 	$(DOCKER_COMPOSE) exec prefect_server prefect server database reset -y
+
+down:   ## Stop all Prefect services, take the server down, and reset the database, DESTRUCTIVE action!
+	$(DOCKER_COMPOSE) down prefect_server
 
 test: uv-exists ## Run tests of our Prefect functionality
 	$(UVRUN) pytest . -s --log-cli-level=INFO
