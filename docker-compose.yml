@@ -37,11 +37,15 @@ x-github-pat: &github-pat
 
 services:
   prefect_server:
-    env_file: "./prefect/.env"
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
     ports:
       - ${PREFECT_SERVER_API_PORT:-4200}:4200
+    environment:
+      PREFECT_SERVER_API_HOST: ${PREFECT_SERVER_API_HOST:-localhost}
+      PREFECT_SERVER_API_PORT: ${PREFECT_SERVER_API_PORT:-4200}
+      PREFECT_SERVER_API_AUTH_STRING: ${PREFECT_SERVER_API_AUTH_STRING:-admin:pass}
+      PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING:-admin:pass}
 
   omop_es:
     env_file: "./omop_es/.env"
