@@ -40,7 +40,7 @@ services:
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
     ports:
-      - ${PREFECT_SERVER_API_PORT:-4200}:4200
+      - ${PREFECT_SERVER_API_PORT:-4200}:${PREFECT_SERVER_API_PORT:-4200}
     environment:
       PREFECT_SERVER_API_HOST: ${PREFECT_SERVER_API_HOST:-localhost}
       PREFECT_SERVER_API_PORT: ${PREFECT_SERVER_API_PORT:-4200}
