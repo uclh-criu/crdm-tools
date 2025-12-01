@@ -120,7 +120,7 @@ make stop-server
 This will preserve existing deployments and settings. Workers will also continue to run but will be
 suspended until the server is restarted.
 
-### Cleaning up
+### Teardown
 
 To stop all Prefect services, take the server down, and reset the database:
 
@@ -130,7 +130,7 @@ To stop all Prefect services, take the server down, and reset the database:
 > This operation cannot be undone.
 
 ```shell
-make clean
+make down
 ```
 
 ## Configuring projects
@@ -139,7 +139,8 @@ _Under construction_
 
 ## Deploy Prefect on the GAE
 
-To run Prefect on the GAE, make sure to set the following environment variables in `prefect/.env`:
+To run Prefect on the GAE, make sure to set the following environment variables in the root
+directory `.env`:
 
 ```shell
 # For GAE10, will differ for other GAE instances
@@ -148,9 +149,8 @@ PREFECT_SERVER_API_PORT=8082
 PREFECT_API_URL=http://uclvlddpragae10:8082/api
 ```
 
-For unknown reasons, the GAE is unable to serve the Prefect server on the default `4200` port. With
-these settings, the dashboard will be hosted at `http://uclvlddpragae10:8082/dashboard` (accessible
-through the UCLH network only).
+The `4200` port is unavaiable on the GAE. With these settings, the dashboard will be hosted at
+`http://uclvlddpragae10:8082/dashboard` (accessible through the UCLH network only).
 
 When running `prefect` commands (see above) on a GAE, make sure the GAE's address is included in the
 `NO_PROXY` environment variable in the `.env` file and run `uv` with the `--env-file .env` flag, as
