@@ -61,7 +61,8 @@ jobs:
           cp omop-cascade/template.env omop-cascade/.env
 
       - name: Run pytest
+        working-directory: ./prefect
         env:
           GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         run: |
-          make test
+          pytest . -s
