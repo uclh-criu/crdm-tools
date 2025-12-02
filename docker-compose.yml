@@ -36,6 +36,20 @@ x-github-pat: &github-pat
   GITHUB_PAT: ${GITHUB_PAT}
 
 services:
+  prefect_server:
+    image: prefecthq/prefect:3-latest
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - ${PREFECT_SERVER_API_PORT:-4200}:${PREFECT_SERVER_API_PORT:-4200}
+    environment:
+      PREFECT_SERVER_API_HOST: ${PREFECT_SERVER_API_HOST:-localhost}
+      PREFECT_SERVER_API_PORT: ${PREFECT_SERVER_API_PORT:-4200}
+      # Required
+      PREFECT_SERVER_API_AUTH_STRING: ${PREFECT_SERVER_API_AUTH_STRING:?}
+      PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING:?}
+    volumes:
+      - prefect_db:/root/.prefect
+
   omop_es:
     env_file: "./omop_es/.env"
     build:
@@ -73,3 +87,6 @@ services:
       TZ: Europe/London
     volumes:
       - "./omop-cascade/local:/share/local"
+
+volumes:
+  prefect_db:

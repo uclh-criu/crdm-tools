@@ -18,10 +18,10 @@ name: Check the Prefect Makefile
 on:
   push:
     branches: ["main"]
-    paths: ["prefect/**"]
+    paths: ["./Makefile"]
   pull_request:
     branches: ["main"]
-    paths: ["prefect/**"]
+    paths: ["./Makefile"]
   workflow_dispatch:
 
 jobs:
@@ -37,7 +37,6 @@ jobs:
           version: "0.6.1"
 
       - name: Run smoke check of Makefile
-        working-directory: ./prefect
         run: |
           make help
           make uv-exists

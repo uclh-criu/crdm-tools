@@ -19,7 +19,7 @@
 
 # Generic metadata about this project
 name: prefect
-prefect-version: 3.1.14
+prefect-version: 3.6.4
 
 # build section allows you to manage and build docker images
 build:
@@ -30,7 +30,6 @@ push:
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
   - prefect.deployments.steps.set_working_directory:
-      # Use local current directory
       directory: "{{ $PWD }}"
 
 # the deployments section allows you to provide configuration for deploying flows
@@ -39,7 +38,7 @@ deployments:
     version:
     tags: [dev]
     description: Development deployment - always pulls latest from master branch
-    entrypoint: run_omop_es.py:run_omop_es
+    entrypoint: prefect/run_omop_es.py:run_omop_es
     schedules: null
     parameters:
       omop_es_version: master  # Branch name - will always pull latest
@@ -55,7 +54,7 @@ deployments:
     version:
     tags: [prod]
     description: Production deployment - configure omop_es_version parameter when deploying
-    entrypoint: run_omop_es.py:run_omop_es
+    entrypoint: prefect/run_omop_es.py:run_omop_es
     schedules: null
     parameters:
       # omop_es_version can be:
