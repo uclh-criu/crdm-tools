@@ -21,12 +21,29 @@ First set the required environment variables:
 cp template.env .env
 ```
 
-and fill out the `.env` file as needed.
+and fill out the `.env` file as needed. The `prefect_server` takes the following environment
+variables:
+
+- `PREFECT_SERVER_API_HOST`: The host for the Prefect server API, typically `localhost`, or the GAE
+  host name. The default is `localhost`.
+- `PREFECT_SERVER_API_PORT`: The port for the Prefect server API. The default is 4200.
+
+The following 2 variables are required and the `prefect_server` Docker service will fail to start
+without them:
+
+- `PREFECT_SERVER_API_AUTH_STRING`: authentication setting for the process hosting the Prefect
+  server
+- `PREFECT_API_AUTH_STRING`: authentication for any client process that needs to communicate with
+  the Prefect API (e.g. when deploying workflows)
+
+These two should match and should be a string with an administrator / password combination,
+separated by a colon, e.g. `admin:password`. With these settings, the dashboard UI will prompt for
+the full authentication string (e.g. `admin:password`) upon first load.
+
+### Starting the server
 
 We provide a `Makefile` to run the relevant deployment commands. Run `make help` to see the
 available commands.
-
-### Starting the server
 
 To spin up the server run:
 
