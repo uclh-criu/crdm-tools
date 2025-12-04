@@ -73,12 +73,13 @@ FROM base AS omop_es-builder
 ARG GITHUB_PAT
 RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
 
-# Initial pull, always clone from default branch for initial renv restore
-# This step is cached
 RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
 
+WORKDIR /app/omop_es
+
 ARG OMOP_ES_VERSION="master"
-RUN git -C ./omop_es checkout ${OMOP_ES_VERSION}
+RUN git fetch --all --tags --quiet && \
+    git checkout ${OMOP_ES_VERSION}
 
 # Final omop_es image
 FROM base AS omop_es
