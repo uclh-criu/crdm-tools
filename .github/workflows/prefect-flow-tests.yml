@@ -18,10 +18,8 @@ name: Run tests of Prefect flow and task code
 on:
   push:
     branches: ["main"]
-    paths: ["prefect/**"]
   pull_request:
     branches: ["main"]
-    paths: ["prefect/**"]
   workflow_dispatch:
 
 # Only run actions on the most recent push to a branch
