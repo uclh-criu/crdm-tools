@@ -8,3 +8,5 @@ __pycache__
 
 # Ignore text editor files
 .vscode
+
+.cache/
