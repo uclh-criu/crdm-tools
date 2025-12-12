@@ -49,13 +49,12 @@ def use_prod_if(condition: bool):
         yield "docker-compose.prod.yml"
 
 
-@flow(flow_run_name="{settings_id}-{extract_datetime}", log_prints=True)
+@flow(flow_run_name="{settings_id}-{date:%A}", log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
     batched: bool = False,
     zip_output: bool = False,
-    extract_datetime: str = name_with_timestamp(),
 ) -> None:
     """Run omop_es data extraction workflow.
 
