@@ -44,8 +44,7 @@ def rebuild_test_docker():
 
 @freeze_time("2025-01-01")
 def test_get_flow_datetime():
-    # The prefect deployment name is set to 'None' (because we're not in a prefect deployment)
-    # we intercept this and set it to lowercase because docker is picky about project names.
+    # Test that *get_flow_datetime returns the correct formatted datetime
     assert run_omop_es.get_flow_datetime() == "20250101_000000"
 
 
