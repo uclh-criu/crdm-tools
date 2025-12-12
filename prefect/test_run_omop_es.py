@@ -43,10 +43,10 @@ def rebuild_test_docker():
 
 
 @freeze_time("2025-01-01")
-def test_name_with_timestamp():
+def test_get_flow_datetime():
     # The prefect deployment name is set to 'None' (because we're not in a prefect deployment)
     # we intercept this and set it to lowercase because docker is picky about project names.
-    assert run_omop_es.name_with_timestamp() == "none_2025-01-01T00:00:00+00:00"
+    assert run_omop_es.get_flow_datetime() == "20250101_000000"
 
 
 def test_star_dry_run_if():
