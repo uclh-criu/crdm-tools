@@ -139,7 +139,16 @@ suspended until the server is restarted.
 
 ### Teardown
 
-To stop all Prefect services, take the server down, and reset the database:
+To take the server down:
+
+```shell
+make down
+```
+
+this will take down the Docker container running the server. The Prefect database is mounted as a
+volume and so will be preserved when the server is brought up again.
+
+To reset the prefect database (requires the server to be running):
 
 <!--prettier-ignore-->
 > [!WARNING]
@@ -147,12 +156,8 @@ To stop all Prefect services, take the server down, and reset the database:
 > This operation cannot be undone.
 
 ```shell
-make down
+make reset-prefect-database
 ```
-
-## Configuring projects
-
-_Under construction_
 
 ## Deploy Prefect on the GAE
 
@@ -166,7 +171,7 @@ PREFECT_SERVER_API_PORT=8082
 PREFECT_API_URL=http://uclvlddpragae10:8082/api
 ```
 
-The `4200` port is unavaiable on the GAE. With these settings, the dashboard will be hosted at
+The `4200` port is unavailable on the GAE. With these settings, the dashboard will be hosted at
 `http://uclvlddpragae10:8082/dashboard` (accessible through the UCLH network only).
 
 When running `prefect` commands (see above) on a GAE, make sure the GAE's address is included in the
@@ -176,6 +181,22 @@ When running `prefect` commands (see above) on a GAE, make sure the GAE's addres
 ```shell
 NO_PROXY="localhost,127.0.0.1,uclvlddpragae10"
 ```
+
+### `/tmp/runner_storage` permissions
+
+When creating Prefect workers, the `/tmp/runner_storage` directory will be created and owned by
+whoever launched the worker. Unfortunately, whenever someone else tries to launch a worker
+subsequently, they will get a permission error as they won't have access to `/tmp/runner_storage`.
+
+To get around this, the original creator of `/tmp/runner_storage`, should relax the permissions by
+running
+
+```bash
+chmod g+rwx /tmp/runner_storage
+chgrp docker /tmp/runner_storage
+```
+
+This will have to be repeated whenever the `/tmp/runner_storage` gets removed an recreated.
 
 ## Building the images
 
