@@ -50,7 +50,7 @@ def use_prod_if(condition: bool):
 
 
 # use string concatenation to avoid processing of curly brackets
-@flow(flow_run_name="{"+"settings_id"+"}-"+get_flow_datetime(), log_prints=True)
+@flow(flow_run_name="{" + "settings_id" + "}-" + get_flow_datetime(), log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
