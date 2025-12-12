@@ -55,6 +55,7 @@ def run_omop_es(
     omop_es_version: str = "master",
     batched: bool = False,
     zip_output: bool = False,
+    date: str = datetime.datetime,
 ) -> None:
     """Run omop_es data extraction workflow.
 
