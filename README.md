@@ -182,6 +182,22 @@ When running `prefect` commands (see above) on a GAE, make sure the GAE's addres
 NO_PROXY="localhost,127.0.0.1,uclvlddpragae10"
 ```
 
+### `/tmp/runner_storage` permissions
+
+When creating Prefect workers, the `/tmp/runner_storage` directory will be created and owned by
+whoever launched the worker. Unfortunately, whenever someone else tries to launch a worker
+subsequently, they will get a permission error as they won't have access to `/tmp/runner_storage`.
+
+To get around this, the original creator of `/tmp/runner_storage`, should relax the permissions by
+running
+
+```bash
+chmod g+rwx /tmp/runner_storage
+chgrp docker /tmp/runner_storage
+```
+
+This will have to be repeated whenever the `/tmp/runner_storage` gets removed an recreated.
+
 ## Building the images
 
 Use `docker compose build` to build all images, or specify the image to build.
