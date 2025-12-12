@@ -50,7 +50,7 @@ def use_prod_if(condition: bool):
         yield "docker-compose.prod.yml"
 
 
-@flow(flow_run_name="{settings_id}-{name_with_timestamp()}", log_prints=True)
+@flow(flow_run_name="{"+"settings_id"+"}_"+datetime.datetime.now(datetime.timezone.utc):%Y%m%d_%H%M%S, log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
