@@ -9,6 +9,12 @@ In addition, the [`prefect/` directory](prefect/) provides data workflow orchest
 [Prefect](https://docs.prefect.io/v3/get-started/index) to allow automatic scheduling of `omop_es`
 runs.
 
+## Requirements
+
+This repository requires [`uv`](https://docs.astral.sh/uv/getting-started/installation/) to be installed.
+
+For GAE users, please follow these [instructions](https://uclh.slab.com/posts/shared-virtual-python-environments-with-uv-u7pa2fv4#h8mzl-per-person-setup-tasks).
+
 ## Deploying the Prefect infrastructure
 
 <!--prettier-ignore-->
