@@ -33,7 +33,8 @@ logger = logging.get_logger()
 def name_with_timestamp() -> str:
     """Generate a name for the flow run with a timestamp."""
     now = datetime.datetime.now(datetime.timezone.utc)
-    return f"{DEPLOYMENT_NAME}_{now.isoformat()}"
+    # return f"{DEPLOYMENT_NAME}_{now.isoformat()}"
+    return f"{now:%Y%m%d_%H%M%S}"
 
 
 def dry_run_if(condition: bool):
@@ -49,13 +50,13 @@ def use_prod_if(condition: bool):
         yield "docker-compose.prod.yml"
 
 
-@flow(flow_run_name="{settings_id}-{date:%Y%m%d%H%M%S}", log_prints=True)
+@flow(flow_run_name="{settings_id}-{name_with_timestamp}", log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
     batched: bool = False,
     zip_output: bool = False,
-    date: datetime.datetime = datetime.datetime.now(datetime.timezone.utc),
+    # extract_dt: datetime.datetime = datetime.datetime.now(datetime.timezone.utc),
 ) -> None:
     """Run omop_es data extraction workflow.
 
