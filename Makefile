@@ -45,7 +45,7 @@ delete-pool: uv-exists ## Delete the Prefect worker pool
 reset-prefect-database: ## Reset the Prefect database, DESTRUCTIVE action! Requires the container to be running
 	$(DOCKER_COMPOSE) exec prefect_server prefect server database reset -y
 
-down:   ## Stop all Prefect services, take the server down, and reset the database, DESTRUCTIVE action!
+down:   ## Stop all Prefect services, take the server down
 	$(DOCKER_COMPOSE) down prefect_server
 
 test: uv-exists ## Run tests of our Prefect functionality
