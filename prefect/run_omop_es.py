@@ -25,16 +25,15 @@ from prefect import flow, logging, runtime, task
 from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
-DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
 IS_PROD = os.environ.get("ENVIRONMENT", "dev") == "prod"
 
 logger = logging.get_logger()
 
 
-def name_with_timestamp() -> str:
-    """Generate a name for the flow run with a timestamp."""
+def get_flow_datetime() -> str:
+    """Generate a datetime (YYYYmmdd_HHMMSS) for the flow run name."""
     now = datetime.datetime.now(datetime.timezone.utc)
-    return f"{DEPLOYMENT_NAME}_{now.isoformat()}"
+    return f"{now:%Y%m%d_%H%M%S}"
 
 
 def dry_run_if(condition: bool):
@@ -50,12 +49,12 @@ def use_prod_if(condition: bool):
         yield "docker-compose.prod.yml"
 
 
-@flow(flow_run_name=name_with_timestamp, log_prints=True)
+# use string concatenation to avoid processing of curly brackets
+@flow(flow_run_name="{settings_id}-" + get_flow_datetime(), log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
     batched: bool = False,
-    output_directory: str = "",
     zip_output: bool = False,
 ) -> None:
     """Run omop_es data extraction workflow.
@@ -64,7 +63,6 @@ def run_omop_es(
         settings_id: Project settings identifier
         omop_es_version: Git ref to use - can be a branch name, commit SHA, or tag name
         batched: Whether to run in batched mode
-        output_directory: Custom output directory path
         zip_output: Whether to compress output
     """
     pinned_version = pin_omop_es_version(omop_es_version)
@@ -74,7 +72,7 @@ def run_omop_es(
         settings_id=settings_id,
         omop_es_version=pinned_version,
         batched=batched,
-        output_directory=output_directory,
+        output_directory=runtime.flow_run.name,
         zip_output=zip_output,
     )
 
