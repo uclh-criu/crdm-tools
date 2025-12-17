@@ -44,7 +44,7 @@ def rebuild_test_docker():
 
 @freeze_time("2025-01-01")
 def test_get_flow_datetime():
-    # Test that *get_flow_datetime returns the correct formatted datetime
+    # Test that get_flow_datetime returns the correct formatted datetime
     assert run_omop_es.get_flow_datetime() == "20250101_000000"
 
 

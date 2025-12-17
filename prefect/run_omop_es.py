@@ -25,7 +25,6 @@ from prefect import flow, logging, runtime, task
 from run_subprocess import run_subprocess
 
 ROOT_PATH = Path(__file__).parents[1]
-DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
 IS_PROD = os.environ.get("ENVIRONMENT", "dev") == "prod"
 
 logger = logging.get_logger()
@@ -51,7 +50,7 @@ def use_prod_if(condition: bool):
 
 
 # use string concatenation to avoid processing of curly brackets
-@flow(flow_run_name="{" + "settings_id" + "}-" + get_flow_datetime(), log_prints=True)
+@flow(flow_run_name="{settings_id}-" + get_flow_datetime(), log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
