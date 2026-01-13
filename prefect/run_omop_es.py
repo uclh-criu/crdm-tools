@@ -19,10 +19,9 @@ import re
 import subprocess
 from pathlib import Path
 
-import dotenv
-from prefect import flow, logging, runtime, task
-
 from run_subprocess import run_subprocess
+
+from prefect import flow, logging, runtime, task
 
 ROOT_PATH = Path(__file__).parents[1]
 DEPLOYMENT_NAME = str(runtime.deployment.name).lower()
@@ -83,6 +82,7 @@ def run_omop_es(
 def pin_omop_es_version(ref: str) -> str:
     """
     Finds the latest commit hash for the given OMOP_ES ref.
+    Uses SSH authentication (requires SSH key configured on host).
 
     Args:
         ref: The OMOP_ES ref to find the latest commit hash for. Can be a branch, tag, or commit SHA.
@@ -90,13 +90,7 @@ def pin_omop_es_version(ref: str) -> str:
     Returns:
         The latest commit hash for the given OMOP_ES ref.
     """
-    dotenv.load_dotenv(ROOT_PATH / ".env")
-    github_pat = os.environ.get("GITHUB_PAT")
-    if not github_pat:
-        raise ValueError("GITHUB_PAT environment variable not set")
-    omop_es_url = (
-        f"https://x-access-token:{github_pat}@github.com/uclh-criu/omop_es.git"
-    )
+    omop_es_url = "git@github.com:uclh-criu/omop_es.git"
 
     try:
         sha = get_latest_commit_sha(omop_es_url, ref)
