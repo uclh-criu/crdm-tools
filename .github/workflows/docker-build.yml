@@ -40,11 +40,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.OMOP_ES_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
       - name: Build the Docker image
         env:
-          GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
+          DOCKER_BUILDKIT: 1
         run: |
           cp template.env .env
           cp omop_es/template.env omop_es/.env
           cp omop-cascade/template.env omop-cascade/.env
-          docker compose build ${{ matrix.image }} --build-arg GITHUB_PAT=${GITHUB_PAT}
+          docker compose build ${{ matrix.image }}
