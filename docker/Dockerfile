@@ -72,25 +72,31 @@ WORKDIR /app
 # using multi-stage build so SSH keys are not present in the final image
 FROM base AS omop_es-builder
 
-# Install SSH client
+# Install SSH client and configure SSH as root
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends openssh-client && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
-USER docker
 
 # Configure SSH known_hosts for GitHub
-RUN mkdir -p -m 0700 ~/.ssh && \
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
+RUN mkdir -p -m 0700 /root/.ssh && \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-# Mount SSH agent socket and clone with SSH
-RUN --mount=type=ssh git clone git@github.com:uclh-criu/omop_es.git ./omop_es
+# Mount SSH agent socket and clone with SSH (must run as root for socket access)
+RUN --mount=type=ssh \
+    git clone git@github.com:milanmlft/omop_es.git /app/omop_es && \
+    chown -R docker:docker /app/omop_es
 
 WORKDIR /app/omop_es
 
 ARG OMOP_ES_VERSION="master"
-RUN --mount=type=ssh git fetch --all --tags --quiet && \
-    git checkout ${OMOP_ES_VERSION}
+RUN --mount=type=ssh \
+    git config --global --add safe.directory /app/omop_es && \
+    git fetch --all --tags --quiet && \
+    git checkout ${OMOP_ES_VERSION} && \
+    chown -R docker:docker /app/omop_es
+
+USER docker
 
 # Final omop_es image
 FROM base AS omop_es
@@ -119,21 +125,20 @@ FROM base AS omop-cascade-builder
 
 ARG OMOP_CASCADE_BRANCH
 
-# Install SSH client
+# Install SSH client and configure SSH as root
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends openssh-client && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
-USER docker
 
 # Configure SSH known_hosts for GitHub
-RUN mkdir -p -m 0700 ~/.ssh && \
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
+RUN mkdir -p -m 0700 /root/.ssh && \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-# Mount SSH agent socket and clone with SSH
-RUN --mount=type=ssh git clone -b ${OMOP_CASCADE_BRANCH} \
-    git@github.com:uclh-criu/omop-cascade.git \
-    /app/omop-cascade
+# Mount SSH agent socket and clone with SSH (must run as root for socket access)
+RUN --mount=type=ssh \
+    git clone -b ${OMOP_CASCADE_BRANCH} git@github.com:uclh-criu/omop-cascade.git /app/omop-cascade && \
+    chown -R docker:docker /app/omop-cascade
 
 # omop-cascade
 FROM base AS omop-cascade
