@@ -92,11 +92,9 @@ RUN --mount=type=ssh \
 
 WORKDIR /app/omop_es
 
-ARG OMOP_ES_VERSION="master"
 RUN --mount=type=ssh \
     git config --global --add safe.directory /app/omop_es && \
     git fetch --all --tags --quiet && \
-    git checkout ${OMOP_ES_VERSION} && \
     chown -R docker:docker /app/omop_es
 
 USER docker
