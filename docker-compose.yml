@@ -32,9 +32,6 @@ x-docker-gid: &docker-gid
 x-build-args-common: &build-args-common
   <<: [*proxy-common, *docker-gid]
 
-x-github-pat: &github-pat
-  GITHUB_PAT: ${GITHUB_PAT}
-
 services:
   prefect_server:
     image: prefecthq/prefect:3-latest
@@ -55,8 +52,10 @@ services:
     build:
       context: "./docker"
       target: omop_es
+      ssh:
+        - default
       args:
-        <<: [*build-args-common, *github-pat]
+        <<: *build-args-common
     platform: linux/amd64
     environment:
       <<: *proxy-common
@@ -77,8 +76,10 @@ services:
     build:
       context: "./docker"
       target: omop-cascade
+      ssh:
+        - default
       args:
-        <<: [*build-args-common, *github-pat]
+        <<: *build-args-common
         OMOP_CASCADE_BRANCH: ${OMOP_CASCADE_BRANCH:-master}
     platform: linux/amd64
     environment:
