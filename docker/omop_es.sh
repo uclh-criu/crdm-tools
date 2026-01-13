@@ -16,6 +16,20 @@
 
 set -euxo pipefail
 
+# Verify SSH agent is available for git operations
+if [ ! -S "$SSH_AUTH_SOCK" ]; then
+    echo "ERROR: SSH agent socket not found at SSH_AUTH_SOCK=$SSH_AUTH_SOCK"
+    echo "Ensure SSH agent is running and SSH_AUTH_SOCK is correctly mounted."
+    exit 1
+fi
+
+# Test SSH connection to GitHub
+if ! ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+    echo "ERROR: SSH authentication to GitHub failed."
+    echo "Ensure the SSH deploy key is loaded in the SSH agent."
+    exit 1
+fi
+
 # Helper function to convert to lowercase
 tolower() {
 	echo "$1" | tr '[:upper:]' '[:lower:]'

@@ -17,7 +17,7 @@
 
 ### Local Development Setup
 
-For Docker builds to work, ensure your SSH key is loaded:
+For both Docker builds and runtime operations to work, ensure your SSH key is loaded:
 
 ```bash
 # Start SSH agent
@@ -31,10 +31,14 @@ ssh -T git@github.com
 
 # Build with SSH forwarding (BuildKit must be enabled)
 DOCKER_BUILDKIT=1 docker compose build omop_es
+
+# Run container (SSH agent is automatically forwarded at runtime)
+docker compose run omop_es
 ```
 
 Docker BuildKit automatically forwards your SSH agent to build containers when enabled with
-`DOCKER_BUILDKIT=1`.
+`DOCKER_BUILDKIT=1`. At runtime, the `SSH_AUTH_SOCK` environment variable is mounted into the
+container to allow git operations (e.g., fetching updates, checking out refs).
 
 ### GAE Setup
 
@@ -59,7 +63,18 @@ On each GAE instance:
    ssh-add ~/.ssh/id_ed25519
    ```
 
-4. For persistent agent, add to `~/.bashrc` or use a systemd service.
+4. For persistent agent across reboots, create a systemd user service or add to shell profile:
+
+   ```bash
+   # Add to ~/.bashrc or ~/.profile
+   if [ -z "$SSH_AUTH_SOCK" ]; then
+       eval "$(ssh-agent -s)"
+       ssh-add ~/.ssh/id_ed25519 2>/dev/null
+   fi
+   ```
+
+   **Important**: The SSH agent must be running before starting Docker containers, as the
+   `SSH_AUTH_SOCK` socket is mounted into containers at runtime for git operations.
 
 ### GitHub Actions Setup
 

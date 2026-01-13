@@ -35,7 +35,10 @@ RUN apt-get update && \
     libnode-dev \
     gnupg \
     libudunits2-dev \
-    libgdal-dev && \
+    libgdal-dev \
+    # git and SSH client for runtime operations
+    git \
+    openssh-client && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
 
 # Enable Microsoft SQLServer
@@ -100,6 +103,12 @@ USER docker
 
 # Final omop_es image
 FROM base AS omop_es
+
+# Configure SSH known_hosts for GitHub (as docker user)
+# Needed for runtime operations
+RUN mkdir -p -m 0700 /home/docker/.ssh && \
+    ssh-keyscan github.com >> /home/docker/.ssh/known_hosts && \
+    chmod 600 /home/docker/.ssh/known_hosts
 
 COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app/omop_es
 

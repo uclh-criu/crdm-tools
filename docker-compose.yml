@@ -66,10 +66,14 @@ services:
       BATCHED: "${BATCHED}"
       OUTPUT_DIRECTORY: "${OUTPUT_DIRECTORY}"
       ZIP_OUTPUT: "${ZIP_OUTPUT}"
+      SSH_AUTH_SOCK: /ssh-agent
       TZ: Europe/London
     volumes:
       - "./extract:/app/extract"
       - "${RENV_PATHS_CACHE_HOST}:${RENV_PATHS_CACHE_CONTAINER}"
+      - type: bind
+        source: ${SSH_AUTH_SOCK}
+        target: /ssh-agent
 
   omop-cascade:
     env_file: "./omop-cascade/.env"
