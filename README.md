@@ -202,6 +202,11 @@ This will have to be repeated whenever the `/tmp/runner_storage` gets removed an
 
 Use `docker compose build` to build all images, or specify the image to build.
 
+**Note:** Building Docker images requires SSH authentication. Ensure your SSH agent is running and
+has the deploy key loaded before building. See
+[Access to private GitHub repos with SSH Deploy Keys](#access-to-private-github-repos-with-ssh-deploy-keys)
+for setup instructions.
+
 ### `omop_es`
 
 ```shell
@@ -257,25 +262,72 @@ docker compose -f docker-compose.prod.yml --project-name <PROJECT-NAME> run --bu
     omop_es
 ```
 
-## Access to private GitHub repos from GAE
+## Access to private GitHub repos with SSH Deploy Keys
 
-To be able to clone GitHub repos on a GAE, create a new
-[fine-grained personal access token](https://github.com/settings/personal-access-tokens), make sure
-the "Resource owner" is set to `uclh-criu` and then select the repositories you want to access.
-Submit the request to generate the token and then make sure to copy the token to a safe place as it
-will not be shown again!
+### Creating Deploy Keys
 
-First store your PAT in a file on the GAE in the path `~/.pat.txt`, then configure `git` to use the
-token by running the following command:
+1. Generate an SSH key pair (if you don't have one):
 
-```shell
-git config --global credential.helper 'store --file ~/.pat.txt'
+   ```bash
+   ssh-keygen -t ed25519 -C "crdm-tools-deploy-key" -f ~/.ssh/crdm_deploy_key
+   ```
+
+2. Add the public key as a deploy key to both repositories:
+   - Go to `https://github.com/uclh-criu/omop_es/settings/keys`
+   - Click "Add deploy key"
+   - Paste contents of `~/.ssh/crdm_deploy_key.pub`
+   - Grant read-only access
+   - Repeat for `https://github.com/uclh-criu/omop-cascade`
+
+### Local Development Setup
+
+For Docker builds to work, ensure your SSH key is loaded:
+
+```bash
+# Start SSH agent
+eval "$(ssh-agent -s)"
+
+# Add your key
+ssh-add ~/.ssh/crdm_deploy_key
+
+# Verify access
+ssh -T git@github.com
+
+# Build with SSH forwarding
+docker compose build omop_es
 ```
 
-This process needs to be repeated for every GAE.
+Docker BuildKit automatically forwards your SSH agent to build containers.
 
-Additionally record the token in the `GITHUB_PAT` environment variable in the `.env` file in this
-repository's root.
+### GAE Setup
+
+On each GAE instance:
+
+1. Copy the private key to the GAE:
+
+   ```bash
+   scp ~/.ssh/crdm_deploy_key user@gae-host:~/.ssh/id_ed25519
+   ```
+
+2. Set proper permissions:
+
+   ```bash
+   chmod 600 ~/.ssh/id_ed25519
+   ```
+
+3. Add to SSH agent:
+
+   ```bash
+   eval "$(ssh-agent -s)"
+   ssh-add ~/.ssh/id_ed25519
+   ```
+
+4. For persistent agent, add to `~/.bashrc` or use a systemd service.
+
+### GitHub Actions Setup
+
+The deploy key private key is stored as a GitHub Actions secret (`OMOP_ES_DEPLOY_KEY`). This is
+automatically configured in CI/CD workflows.
 
 ## Development
 
