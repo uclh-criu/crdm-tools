@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# syntax=docker/dockerfile:1
+
 FROM rocker/tidyverse:4.4.3 AS base
 
 ARG DOCKER_USER_GID=1000
@@ -67,18 +69,27 @@ WORKDIR /app
 
 
 # omop_es-builder
-# using multi-stage build so the GitHub PAT is not present in the final image
+# using multi-stage build so SSH keys are not present in the final image
 FROM base AS omop_es-builder
 
-ARG GITHUB_PAT
-RUN test -n "$GITHUB_PAT" || (echo "GITHUB_PAT is required" && exit 1)
+# Install SSH client
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssh-client && \
+    apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
+USER docker
 
-RUN git clone https://${GITHUB_PAT}@github.com/uclh-criu/omop_es.git ./omop_es
+# Configure SSH known_hosts for GitHub
+RUN mkdir -p -m 0700 ~/.ssh && \
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# Mount SSH agent socket and clone with SSH
+RUN --mount=type=ssh git clone git@github.com:uclh-criu/omop_es.git ./omop_es
 
 WORKDIR /app/omop_es
 
 ARG OMOP_ES_VERSION="master"
-RUN git fetch --all --tags --quiet && \
+RUN --mount=type=ssh git fetch --all --tags --quiet && \
     git checkout ${OMOP_ES_VERSION}
 
 # Final omop_es image
@@ -103,14 +114,25 @@ CMD ["/app/omop_es.sh"]
 
 # omop-cascade
 # omop-cascade-builder
-# using multi-stage build so the GitHub PAT is not present in the final image
+# using multi-stage build so SSH keys are not present in the final image
 FROM base AS omop-cascade-builder
 
 ARG OMOP_CASCADE_BRANCH
-ARG GITHUB_PAT
 
-RUN git clone -b ${OMOP_CASCADE_BRANCH} \
-    https://${GITHUB_PAT}@github.com/uclh-criu/omop-cascade.git \
+# Install SSH client
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssh-client && \
+    apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
+USER docker
+
+# Configure SSH known_hosts for GitHub
+RUN mkdir -p -m 0700 ~/.ssh && \
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# Mount SSH agent socket and clone with SSH
+RUN --mount=type=ssh git clone -b ${OMOP_CASCADE_BRANCH} \
+    git@github.com:uclh-criu/omop-cascade.git \
     /app/omop-cascade
 
 # omop-cascade
