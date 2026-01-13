@@ -207,20 +207,20 @@ This will have to be repeated whenever the `/tmp/runner_storage` gets removed an
 Use `docker compose build` to build all images, or specify the image to build.
 
 **Note:** Building Docker images requires SSH authentication. Ensure your SSH agent is running and
-has the deploy key loaded before building. See
+has the deploy key loaded before building. BuildKit must be enabled for SSH forwarding. See
 [Access to private GitHub repos with SSH Deploy Keys](#access-to-private-github-repos-with-ssh-deploy-keys)
 for setup instructions.
 
 ### `omop_es`
 
 ```shell
-docker compose build omop_es
+DOCKER_BUILDKIT=1 docker compose build omop_es
 ```
 
 ### `omop-cascade`
 
 ```shell
-docker compose build omop-cascade
+DOCKER_BUILDKIT=1 docker compose build omop-cascade
 ```
 
 ## Version Pinning

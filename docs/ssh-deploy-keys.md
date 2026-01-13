@@ -29,11 +29,12 @@ ssh-add ~/.ssh/crdm_deploy_key
 # Verify access
 ssh -T git@github.com
 
-# Build with SSH forwarding
-docker compose build omop_es
+# Build with SSH forwarding (BuildKit must be enabled)
+DOCKER_BUILDKIT=1 docker compose build omop_es
 ```
 
-Docker BuildKit automatically forwards your SSH agent to build containers.
+Docker BuildKit automatically forwards your SSH agent to build containers when enabled with
+`DOCKER_BUILDKIT=1`.
 
 ### GAE Setup
 
