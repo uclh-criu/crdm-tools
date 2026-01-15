@@ -37,10 +37,11 @@ def get_flow_datetime() -> str:
 
 def get_flow_id() -> str:
     """Retrieve the flow run ID from parent if exists otherwise newly created."""
-    parent_id = runtime.flow_run.parent_flow_run_id
-    if not parent_id:
-        return f"{runtime.flow_run.id}"
-    return f"{parent_id}"
+    # parent_id = runtime.flow_run.parent_flow_run_id
+    # if not parent_id:
+    #     return f"{runtime.flow_run.id}"
+    # return f"{parent_id}"
+    return f"{runtime.flow_run.id}"
 
 def dry_run_if(condition: bool):
     """Optionally yield the dry-run flag for docker compose commands."""
@@ -56,7 +57,7 @@ def use_prod_if(condition: bool):
 
 
 # use string concatenation to avoid processing of curly brackets
-@flow(flow_run_name="{settings_id}-" + get_flow_id(), log_prints=True)
+@flow(flow_run_name="{settings_id}." + get_flow_id(), log_prints=True)
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
