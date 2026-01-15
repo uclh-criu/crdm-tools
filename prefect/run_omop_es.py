@@ -39,8 +39,8 @@ def get_flow_id() -> str:
     """Retrieve the flow run ID from parent if exists otherwise newly created."""
     parent_id = runtime.flow_run.parent_flow_run_id
     if not parent_id:
-        return runtime.flow_run.id
-    return parent_id
+        return f"{runtime.flow_run.id}"
+    return f"{parent_id}"
 
 def dry_run_if(condition: bool):
     """Optionally yield the dry-run flag for docker compose commands."""
