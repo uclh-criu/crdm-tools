@@ -35,13 +35,11 @@ def get_flow_datetime() -> str:
     now = datetime.datetime.now(datetime.timezone.utc)
     return f"{now:%Y%m%d_%H%M%S}"
 
+
 def get_flow_id() -> str:
-    """Retrieve the flow run ID from parent if exists otherwise newly created."""
-    # parent_id = runtime.flow_run.parent_flow_run_id
-    # if not parent_id:
-    #     return f"{runtime.flow_run.id}"
-    # return f"{parent_id}"
+    """Retrieve the flow run ID."""
     return f"{runtime.flow_run.id}"
+
 
 def dry_run_if(condition: bool):
     """Optionally yield the dry-run flag for docker compose commands."""
