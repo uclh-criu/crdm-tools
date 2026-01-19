@@ -17,7 +17,6 @@ import os
 from subprocess import CalledProcessError
 
 import pytest
-from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
 import run_omop_es
