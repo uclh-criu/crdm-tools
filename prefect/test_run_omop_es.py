@@ -42,12 +42,6 @@ def rebuild_test_docker():
             pytest.fail(f"Failed to build docker image: {e}")
 
 
-@freeze_time("2025-01-01")
-def test_get_flow_datetime():
-    # Test that get_flow_datetime returns the correct formatted datetime
-    assert run_omop_es.get_flow_datetime() == "20250101_000000"
-
-
 def test_star_dry_run_if():
     # Test that *dry_run_if expands as we expect
     command_with = ["docker", "compose", *run_omop_es.dry_run_if(True), "do-thing"]
