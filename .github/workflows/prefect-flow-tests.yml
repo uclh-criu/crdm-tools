@@ -41,7 +41,6 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "0.6.1"
-          working-directory: ./prefect
           enable-cache: true
 
       - name: Restore renv cache
@@ -59,7 +58,6 @@ jobs:
           cp omop-cascade/template.env omop-cascade/.env
 
       - name: Run pytest
-        working-directory: ./prefect
         env:
           GITHUB_PAT: ${{ secrets.OMOP_ES_GITHUB_PAT }}
         run: |
