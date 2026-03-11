@@ -1,0 +1,1 @@
+Dummy docker workflow that will fail 75% of the time. On success it writes to ../output/output.txt
