@@ -42,9 +42,7 @@ def dry_run_if(condition: bool):
 
 def use_prod_if(condition: bool):
     """Optionally yield the prod flag for docker compose commands."""
-    if condition:
-        yield "-f"
-        yield "docker-compose.prod.yml"
+    return []
 
 
 # use string concatenation to avoid processing of curly brackets
@@ -86,22 +84,7 @@ def pin_omop_es_version(ref: str) -> str:
     Returns:
         The latest commit hash for the given OMOP_ES ref.
     """
-    dotenv.load_dotenv(ROOT_PATH / ".env")
-    github_pat = os.environ.get("GITHUB_PAT")
-    if not github_pat:
-        raise ValueError("GITHUB_PAT environment variable not set")
-    omop_es_url = (
-        f"https://x-access-token:{github_pat}@github.com/uclh-criu/omop_es.git"
-    )
-
-    try:
-        sha = get_latest_commit_sha(omop_es_url, ref)
-    except RuntimeError:
-        logger.error(f"Invalid OMOP_ES ref: {ref}")
-        raise
-
-    logger.info("Pinning OMOP_ES version to %s", sha)
-    return sha
+    return ""
 
 
 @task(retries=10, retry_delay_seconds=10)
@@ -148,19 +131,6 @@ def run_omop_es_docker(
         "--project-name",
         f"{settings_id}",
         "run",
-        "--env",
-        f"SETTINGS_ID={env['SETTINGS_ID']}",
-        "--env",
-        f"OMOP_ES_VERSION={env['OMOP_ES_VERSION']}",
-        "--env",
-        f"BATCHED={env['BATCHED']}",
-        "--env",
-        f"OUTPUT_DIRECTORY={env['OUTPUT_DIRECTORY']}",
-        "--env",
-        f"ZIP_OUTPUT={env['ZIP_OUTPUT']}",
-        "--env",
-        "DEBUG",  # passed through from global env
-        "--rm",
         "omop_es",
     ]
     return run_subprocess(working_dir, args, env)
