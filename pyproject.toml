@@ -22,7 +22,9 @@ requires-python = "==3.12.7"
 dependencies = [
     "asyncpg==0.30.0",
     "dotenv>=0.9.9",
-    "prefect>=3.6.4",
+    # NOTE: prefect client version should match the server version (in docker-compose.yml)
+    # https://github.com/PrefectHQ/prefect/issues/20750
+    "prefect==3.6.22",
 ]
 
 [tool.pytest.ini_options]

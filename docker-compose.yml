@@ -37,7 +37,9 @@ x-github-pat: &github-pat
 
 services:
   prefect_server:
-    image: prefecthq/prefect:3-latest
+    # NOTE: prefect server version should match the client version (in pyproject.toml)
+    # https://github.com/PrefectHQ/prefect/issues/20750
+    image: prefecthq/prefect:3.6.22-python3.12
     command: prefect server start --host 0.0.0.0
     ports:
       - ${PREFECT_SERVER_API_PORT:-4200}:${PREFECT_SERVER_API_PORT:-4200}
