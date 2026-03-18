@@ -31,7 +31,7 @@ def run_subprocess(
     Helper to run subprocesses.
 
     Using prefect's logging system to log stdout in real-time.
-    Stderr is logged at the end of the process.
+    Stderr is logged at the end of the subprocess.
 
     Args:
         working_dir: The working directory to run the subprocess in.
