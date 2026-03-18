@@ -15,6 +15,7 @@
 
 import re
 import subprocess
+import threading
 from logging import Logger
 from pathlib import Path
 from typing import Optional
@@ -36,16 +37,20 @@ def run_subprocess(
         stdout_lines = []
         stderr_lines = []
 
-        # Stream stdout and stderr in real-time
+        # Read stderr in a separate thread to avoid blocking the main thread when stderr is large
+        def read_stderr():
+            for line in iter(proc.stderr.readline, b""):
+                stderr_lines.append(line.decode())
+
+        stderr_thread = threading.Thread(target=read_stderr)
+        stderr_thread.start()
+
         if proc.stdout:
             for line in iter(proc.stdout.readline, b""):
                 log(line, logger)
                 stdout_lines.append(line.decode())
 
-        if proc.stderr:
-            stderr = proc.stderr.read()
-            stderr_lines = [x.decode() for x in stderr.splitlines()]
-
+        stderr_thread.join()
         proc.wait()
 
     stdout = "\n".join(stdout_lines)
