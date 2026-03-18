@@ -27,7 +27,20 @@ from prefect.logging.loggers import LoggingAdapter
 def run_subprocess(
     working_dir: Path, args: list[str], env: Optional[dict] = None
 ) -> subprocess.CompletedProcess:
-    """Helper to run subprocesses, logging stderr."""
+    """
+    Helper to run subprocesses.
+
+    Using prefect's logging system to log stdout in real-time.
+    Stderr is logged at the end of the process.
+
+    Args:
+        working_dir: The working directory to run the subprocess in.
+        args: The arguments to pass to the subprocess.
+        env: The environment variables to pass to the subprocess.
+
+    Returns:
+        A CompletedProcess object.
+    """
     logger = logging.get_run_logger()
     logger.info(f"Running subprocess: {' '.join(args)}")
 
