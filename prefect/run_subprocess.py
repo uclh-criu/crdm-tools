@@ -15,6 +15,7 @@
 
 import re
 import subprocess
+import threading
 from logging import Logger
 from pathlib import Path
 from typing import Optional
@@ -26,7 +27,20 @@ from prefect.logging.loggers import LoggingAdapter
 def run_subprocess(
     working_dir: Path, args: list[str], env: Optional[dict] = None
 ) -> subprocess.CompletedProcess:
-    """Helper to run subprocesses, logging stderr."""
+    """
+    Helper to run subprocesses.
+
+    Using prefect's logging system to log stdout in real-time.
+    Stderr is logged at the end of the subprocess.
+
+    Args:
+        working_dir: The working directory to run the subprocess in.
+        args: The arguments to pass to the subprocess.
+        env: The environment variables to pass to the subprocess.
+
+    Returns:
+        A CompletedProcess object.
+    """
     logger = logging.get_run_logger()
     logger.info(f"Running subprocess: {' '.join(args)}")
 
@@ -36,16 +50,20 @@ def run_subprocess(
         stdout_lines = []
         stderr_lines = []
 
-        # Stream stdout and stderr in real-time
+        # Read stderr in a separate thread to avoid blocking the main thread when stderr is large
+        def read_stderr():
+            for line in iter(proc.stderr.readline, b""):
+                stderr_lines.append(line.decode())
+
+        stderr_thread = threading.Thread(target=read_stderr)
+        stderr_thread.start()
+
         if proc.stdout:
             for line in iter(proc.stdout.readline, b""):
                 log(line, logger)
                 stdout_lines.append(line.decode())
 
-        if proc.stderr:
-            stderr = proc.stderr.read()
-            stderr_lines = [x.decode() for x in stderr.splitlines()]
-
+        stderr_thread.join()
         proc.wait()
 
     stdout = "\n".join(stdout_lines)
