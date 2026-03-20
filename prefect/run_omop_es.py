@@ -52,6 +52,7 @@ def use_prod_if(condition: bool):
 def run_omop_es(
     settings_id: str,
     omop_es_version: str = "master",
+    output_directory: str | None = None,
     batched: bool = False,
     zip_output: bool = False,
 ) -> None:
@@ -60,6 +61,7 @@ def run_omop_es(
     Args:
         settings_id: Project settings identifier
         omop_es_version: Git ref to use - can be a branch name, commit SHA, or tag name
+        output_directory: Optional output directory for the extracted data, defaults to the flow run name
         batched: Whether to run in batched mode
         zip_output: Whether to compress output
     """
@@ -70,7 +72,7 @@ def run_omop_es(
         settings_id=settings_id,
         omop_es_version=pinned_version,
         batched=batched,
-        output_directory=runtime.flow_run.name,
+        output_directory=output_directory or runtime.flow_run.name,
         zip_output=zip_output,
     )
 
