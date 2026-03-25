@@ -52,8 +52,9 @@ def run_subprocess(
 
         # Read stderr in a separate thread to avoid blocking the main thread when stderr is large
         def read_stderr():
-            for line in iter(proc.stderr.readline, b""):
-                stderr_lines.append(line.decode())
+            if proc.stderr:
+                for line in iter(proc.stderr.readline, b""):
+                    stderr_lines.append(line.decode())
 
         stderr_thread = threading.Thread(target=read_stderr)
         stderr_thread.start()
