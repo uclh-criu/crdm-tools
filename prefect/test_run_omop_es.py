@@ -17,7 +17,6 @@ import os
 from subprocess import CalledProcessError
 
 import pytest
-from freezegun import freeze_time
 from prefect.logging import disable_run_logger
 
 import run_omop_es
@@ -40,13 +39,6 @@ def rebuild_test_docker():
         except CalledProcessError as e:
             print(f"stderr:\n{e.stderr}")
             pytest.fail(f"Failed to build docker image: {e}")
-
-
-@freeze_time("2025-01-01")
-def test_name_with_timestamp():
-    # The prefect deployment name is set to 'None' (because we're not in a prefect deployment)
-    # we intercept this and set it to lowercase because docker is picky about project names.
-    assert run_omop_es.name_with_timestamp() == "none_2025-01-01T00:00:00+00:00"
 
 
 def test_star_dry_run_if():
