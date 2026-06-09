@@ -51,6 +51,7 @@ deployments:
           ENVIRONMENT: dev
 
   - name: omop_es-prod
+    concurrency_limit: 1
     version:
     tags: [prod]
     description: Production deployment - configure omop_es_version parameter when deploying
