@@ -21,6 +21,7 @@ services:
     environment:
         DOCKER_USER_GID: ${DOCKER_USER_GID}
     volumes:
+      - "sharefs1-datamanagement:/sharefs1/InfoDept/000_Users/Data Management Team"
       - "sharefs6-criudata:/sharefs6/criudata/Live"
       - "sharefs7-crdm:/sharefs7/crdm/Shared"
 
@@ -39,6 +40,12 @@ services:
       - "sharefs7-crdm:/sharefs7/crdm/Shared"
 
 volumes:
+  sharefs1-datamanagement:
+    driver: "local"
+    driver_opts:
+      type: "cifs"
+      device: "${SHAREFS1_DATAMANAGEMENT}"
+      o: "user=${USER_UID},domain=${USER_DOMAIN},password=${USER_PWD},uid=1001,gid=${DOCKER_USER_GID}"
   sharefs6-criudata:
     driver: "local"
     driver_opts:
