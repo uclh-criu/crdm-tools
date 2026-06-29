@@ -95,7 +95,7 @@ RUN git restore .
 RUN Rscript -e "renv::hydrate()" && \
     Rscript -e "renv::clean()"
 
-RUN Rscript /app/omop_es/omop_metadata/download_omop_metadata.R
+RUN Rscript omop_metadata/download_omop_metadata.R
 
 WORKDIR /app
 
