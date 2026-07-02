@@ -86,15 +86,20 @@ FROM base AS omop_es
 
 COPY --from=omop_es-builder --chown=docker:docker --chmod=0755 /app/omop_es /app/omop_es
 
+WORKDIR /app/omop_es
+
 # Restore git files after manual copy
-RUN cd /app/omop_es && git restore .
+RUN git restore .
 
 # Bootstrap renv
-RUN cd /app/omop_es && \
-    Rscript -e "renv::hydrate()" && \
+RUN Rscript -e "renv::hydrate()" && \
     Rscript -e "renv::clean()"
 
-COPY --chmod=0755 ./omop_es.sh .
+RUN Rscript omop_metadata/download_omop_metadata.R
+
+WORKDIR /app
+
+COPY --chmod=0755 ./omop_es.sh /app
 
 CMD ["/app/omop_es.sh"]
 
