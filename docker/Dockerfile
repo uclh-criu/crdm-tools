@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM rocker/tidyverse:4.4.3 AS base
+FROM rocker/tidyverse:4.6.1 AS base
 
 ARG DOCKER_USER_GID=1000
 ARG HTTP_PROXY
