@@ -126,7 +126,7 @@ def build_docker(
     run_subprocess(working_dir, args)
 
 
-@task(retries=5, retry_delay_seconds=1800)
+@task(retries=10, retry_delay_seconds=3600)
 def run_omop_es_docker(
     working_dir: Path,
     settings_id: str,
